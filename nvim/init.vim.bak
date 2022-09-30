@@ -237,7 +237,7 @@ nnoremap <silent> <leader>l :wincmd l<CR>
 nnoremap <silent> <leader>ov :e $MYVIMRC<CR>
 nnoremap <silent> <leader>sv :w<CR> :so $MYVIMRC<CR>
 nnoremap <silent> <leader>tv :e $HOME/.tmux.conf<CR>
-nnoremap <silent> <leader>i3 :e $HOME/.config/i3/config<CR>
+nnoremap <silent> <leader>i3 :e $HOME/.config/sway/config<CR>
 
 " sidebars
 nnoremap <silent> <Leader>nn :NERDTreeToggle<CR>

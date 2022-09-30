@@ -1,18 +1,18 @@
 -- helpers
 function map(mode, shortcut, command)
-  vim.api.nvim_set_keymap(mode, shortcut, command, { noremap = true, silent = true })
+    vim.api.nvim_set_keymap(mode, shortcut, command, { noremap = true, silent = true })
 end
 
 function nmap(shortcut, command)
-  map('n', shortcut, command)
+    map('n', shortcut, command)
 end
 
 function imap(shortcut, command)
-  map('i', shortcut, command)
+    map('i', shortcut, command)
 end
 
 function vmap(shortcut, command)
-  map('v', shortcut, command)
+    map('v', shortcut, command)
 end
 
 -- packages
@@ -40,57 +40,78 @@ require("packer").startup(function(use)
         'williamboman/mason-lspconfig.nvim',
     }}
     use {
-      "folke/trouble.nvim",
-      requires = "kyazdani42/nvim-web-devicons",
-      config = function()
-        require("trouble").setup{
-          mode = "workspace_diagnostics",
-          use_diagnostic_signs = true
-        }
-      end
-}
+        "folke/trouble.nvim",
+        requires = "kyazdani42/nvim-web-devicons",
+        config = function()
+            require("trouble").setup{
+                mode = "workspace_diagnostics",
+                use_diagnostic_signs = true
+            }
+        end
+    }
 end)
 
 ---- autocompletion
 require("compe").setup({
-  enabled = true;
-  autocomplete = true;
-  debug = false;
-  min_length = 1;
-  preselect = 'enable';
-  throttle_time = 80;
-  source_timeout = 200;
-  resolve_timeout = 800;
-  incomplete_delay = 400;
-  max_abbr_width = 100;
-  max_kind_width = 100;
-  max_menu_width = 100;
-  documentation = {
-    border = { '', '' ,'', ' ', '', '', '', ' ' }, -- the border option is the same as `|help nvim_open_win|`
-    winhighlight = "NormalFloat:CompeDocumentation,FloatBorder:CompeDocumentationBorder",
-    max_width = 120,
-    min_width = 60,
-    max_height = math.floor(vim.o.lines * 0.3),
-    min_height = 1,
-  };
+    enabled = true;
+    autocomplete = true;
+    debug = false;
+    min_length = 1;
+    preselect = 'enable';
+    throttle_time = 80;
+    source_timeout = 200;
+    resolve_timeout = 800;
+    incomplete_delay = 400;
+    max_abbr_width = 100;
+    max_kind_width = 100;
+    max_menu_width = 100;
+    documentation = {
+        border = { '', '' ,'', ' ', '', '', '', ' ' }, -- the border option is the same as `|help nvim_open_win|`
+        winhighlight = "NormalFloat:CompeDocumentation,FloatBorder:CompeDocumentationBorder",
+        max_width = 120,
+        min_width = 60,
+        max_height = math.floor(vim.o.lines * 0.3),
+        min_height = 1,
+    };
 
-  source = {
-    path = true;
-    buffer = true;
-    calc = true;
-    nvim_lsp = true;
-    nvim_lua = true;
-    vsnip = false;
-    ultisnips = false;
-    luasnip = false;
-    treesitter = true;
-  };
+    source = {
+        path = true;
+        buffer = true;
+        calc = true;
+        nvim_lsp = true;
+        nvim_lua = true;
+        vsnip = false;
+        ultisnips = false;
+        luasnip = false;
+        treesitter = true;
+    };
 })
 
 -- select first option when none selected
 vim.api.nvim_set_keymap("i", "<CR>", "compe#confirm({ 'keys': '<CR>', 'select': v:true })", { expr = true })
 
+-- deps
 require("mason").setup()
+
+vim.cmd [[ autocmd BufLeave,FocusLost * silent! :update ]]
+vim.cmd [[ autocmd BufRead,BufNewFile * setlocal signcolumn=yes ]]
+vim.cmd [[ autocmd FileType nerdtree setlocal signcolumn=no ]]
+
+-- tidy-up whitespaces before write
+vim.cmd [[ autocmd BufWritePre * %s/\s\+$//e ]]
+
+
+-- Make Sure that Vim returns to the same line when we reopen a file"
+vim.cmd [[
+augroup line_return
+    au!
+    au BufReadPost gitcommit let b:execute_on_git_commit=true
+    au BufReadPost *
+                \ if line("'\"") > 0 && line("'\"") <= line("$") && !exists("b:execute_on_git_commit") |
+                \ execute 'normal! g`"zvzz' |
+                \ endif
+augroup END
+]]
 
 vim.g.mapleader = " "
 vim.opt.termguicolors = true
@@ -133,7 +154,7 @@ vim.opt.completeopt = "menuone,noselect"
 require('lsp-setup').setup({
     on_attach = function(client, bufnr)
         require('lsp-setup.utils').format_on_save(client)
-        end,
+    end,
     servers = {
         rust_analyzer = {
         }
@@ -199,6 +220,18 @@ local INITLUA = os.getenv("HOME") .. "/.config/nvim/init.lua"
 nmap("<leader>ov", ":e " .. INITLUA .. "<CR>")
 nmap("<leader>sv", ":w<CR>" .. ":luafile " .. INITLUA .. "<CR>")
 
+-- treesitter
+require("nvim-treesitter.configs").setup({
+    ensure_installed = { "c", "lua", "rust", "sql" },
+    auto_install = true,
+    highlight = {
+        enable = true
+    },
+    indent = {
+        enable = true
+    }
+})
+
 -- close the buffer nicely
 vim.cmd [[
 " Delete buffer while keeping window layout (don't close buffer's windows).
@@ -207,6 +240,7 @@ vim.cmd [[
 if v:version < 700 || exists('loaded_bclose') || &cp
   finish
 endif
+
 let loaded_bclose = 1
 if !exists('bclose_multiple')
   let bclose_multiple = 1
