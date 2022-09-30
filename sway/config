@@ -7,26 +7,20 @@ set $down j
 set $up k
 set $right l
 
-# terminal alacritty
-set $term alacritty
-
-# Your preferred application launcher
-# Note: pass the final command to swaymsg so that the resulting window can be opened
-# on the original workspace that the command was run on.
-set $menu dmenu_path | dmenu | xargs swaymsg exec --
-
 ### Key bindings
 #
 # Basics:
 #
     # Start a terminal
-    bindsym $mod+Shift+Return exec $term
+    bindsym $mod+Shift+Return exec alacritty
 
     # Kill focused window
     bindsym $mod+Shift+q kill
 
     # Start your launcher
-    bindsym $mod+d exec $menu
+    bindsym $mod+d exec runi
+
+    bindsym Print exec sh -c "$HOME/.config/screenshot.sh"
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -169,6 +163,10 @@ bar {
         background #323232
         inactive_workspace #32323200 #32323200 #5c5c5c
     }
+}
+
+input * {
+    xkb_layout "pl"
 }
 
 include $HOME/.local/sway_config
