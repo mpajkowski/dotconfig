@@ -18,7 +18,7 @@ end
 -- packages
 vim.cmd [[ packadd packer.nvim ]]
 
-return require("packer").startup(function(use)
+require("packer").startup(function(use)
     use 'wbthomason/packer.nvim'
     use 'scrooloose/nerdtree'
     use 'junegunn/fzf'
@@ -39,11 +39,17 @@ return require("packer").startup(function(use)
         'williamboman/mason.nvim',
         'williamboman/mason-lspconfig.nvim',
     }}
+    use {
+      "folke/trouble.nvim",
+      requires = "kyazdani42/nvim-web-devicons",
+      config = function()
+        require("trouble").setup{}
+      end
+}
 end)
 
--- autocompletion
-
-require('compe').setup({
+---- autocompletion
+require("compe").setup({
   enabled = true;
   autocomplete = true;
   debug = false;
@@ -61,7 +67,7 @@ require('compe').setup({
     winhighlight = "NormalFloat:CompeDocumentation,FloatBorder:CompeDocumentationBorder",
     max_width = 120,
     min_width = 60,
-    max_height = math.floor(vim.opt.lines * 0.3),
+    max_height = math.floor(vim.o.lines * 0.3),
     min_height = 1,
   };
 
@@ -178,6 +184,13 @@ vmap("<Down>", "<Nop>")
 vmap("<Left>", "<Nop>")
 vmap("<Right>", "<Nop>")
 vmap("<Up>", "<Nop>")
+
+nmap("<leader>dg", ":TroubleToggle<CR>")
+
+local INITLUA = os.getenv("HOME") .. "/.config/nvim/init.lua"
+
+nmap("<leader>ov", ":e " .. INITLUA .. "<CR>")
+nmap("<leader>sv", ":w<CR>" .. ":luafile " .. INITLUA .. "<CR>")
 
 -- close the buffer nicely
 vim.cmd [[
