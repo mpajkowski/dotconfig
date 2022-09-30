@@ -43,7 +43,10 @@ require("packer").startup(function(use)
       "folke/trouble.nvim",
       requires = "kyazdani42/nvim-web-devicons",
       config = function()
-        require("trouble").setup{}
+        require("trouble").setup{
+          mode = "workspace_diagnostics",
+          use_diagnostic_signs = true
+        }
       end
 }
 end)
@@ -128,8 +131,12 @@ vim.opt.completeopt = "menuone,noselect"
 
 -- lsp-setup
 require('lsp-setup').setup({
+    on_attach = function(client, bufnr)
+        require('lsp-setup.utils').format_on_save(client)
+        end,
     servers = {
-        rust_analyzer = {}
+        rust_analyzer = {
+        }
     }
 })
 
