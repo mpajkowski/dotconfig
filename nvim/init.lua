@@ -157,6 +157,9 @@ require('lsp-setup').setup({
     end,
     servers = {
         rust_analyzer = {
+          checkOnSave =  {
+            command = "clippy"
+          }
         }
     }
 })

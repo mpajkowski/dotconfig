@@ -11,6 +11,7 @@ fish_add_path "$ANDROID_SDK_ROOT/emulator"
 fish_add_path "$ANDROID_SDK_ROOT/tools"
 fish_add_path "$HOME/flutter/flutter/bin"
 fish_add_path "/opt/local/bin"
+fish_add_path "/opt/homebrew/bin"
 
 export MOZ_ENABLE_WAYLAND=1
 
