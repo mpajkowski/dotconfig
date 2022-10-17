@@ -183,6 +183,7 @@ let NERDTreeAutoDeleteBuffer = 1
 let NERDTreeHijackNetrw=1
 let g:NERDTreeMapJumpPrevSibling=""
 let g:NERDTreeMapJumpNextSibling=""
+let g:NERDTreeMinimalMenu=1
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 
 " airline
