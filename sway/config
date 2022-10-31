@@ -169,5 +169,7 @@ input * {
     xkb_layout "pl"
 }
 
+for_window [shell="xwayland" ] title_format "%title [Xwayland]"
+
 include $HOME/.local/sway_config
 include /etc/sway/config.d/*

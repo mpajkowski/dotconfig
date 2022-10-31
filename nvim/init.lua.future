@@ -45,7 +45,6 @@ require("packer").startup(function(use)
         config = function()
             require("trouble").setup{
                 mode = "workspace_diagnostics",
-                use_diagnostic_signs = true
             }
         end
     }
@@ -153,14 +152,32 @@ vim.opt.completeopt = "menuone,noselect"
 -- lsp-setup
 require('lsp-setup').setup({
     on_attach = function(client, bufnr)
-        require('lsp-setup.utils').format_on_save(client)
+        require('lsp-setup.utils').format_on_save(client);
+        vim.diagnostic.config({ virtual_text = false })
     end,
     servers = {
         rust_analyzer = {
-          checkOnSave =  {
-            command = "clippy"
-          }
-        }
+          checkOnSave = {
+            command = 'clippy',
+            extraArgs = { '--target-dir', '/tmp/rust-analyzer-check' },
+            allFeatures = true
+          },
+          inlayHints = {
+            parameterHints = {
+              enable = false,
+            },
+            closingBraceHints = {
+              enable = false
+            },
+            typeHints = {
+              enable = false,
+            },
+            maxLength = 1,
+            chainingHints = false,
+            renderColons = false,
+            enable = false,
+          },
+       }
     }
 })
 
