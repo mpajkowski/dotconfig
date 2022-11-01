@@ -13,6 +13,13 @@
 
 (when (eq system-type 'darwin) (customize-set-variable 'native-comp-driver-options '("-Wl,-w")))
 
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default +1)
+
+(use-package exec-path-from-shell
+  :init
+  (exec-path-from-shell-initialize))
+
 ;; font
 (set-frame-font "Monaco 11" nil t)
 
@@ -22,8 +29,6 @@
 (scroll-bar-mode -1)
 (blink-cursor-mode 0)
 (setq make-backup-files nil)
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default +1)
 (setq display-line-numbers 'relative)
 (setq scroll-conservatively most-positive-fixnum)
 (setq display-line-numbers-width 3)
@@ -56,10 +61,6 @@
   (selectrum-mode +1))
 
 (use-package rg)
-
-(use-package exec-path-from-shell
-  :init
-  (exec-path-from-shell-initialize))
 
 (use-package which-key
   :init
