@@ -11,6 +11,8 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(when (eq system-type 'darwin) (customize-set-variable 'native-comp-driver-options '("-Wl,-w")))
+
 ;; font
 (set-frame-font "Monaco 11" nil t)
 
@@ -41,8 +43,7 @@
   (gcmh-mode +1))
 
 ;; search
-(setq completion-styles
-      '(partial-completion substring initials flex))
+(setq completion-styles '(partial-completion substring initials flex))
 
 (setq completion-category-overrides
   '((file (styles . (partial-completion substring)))
@@ -84,7 +85,7 @@
   (dashboard-banner-logo-title "Hejka")
   (dashboard-startup-banner 'logo)
   (dashboard-items '((projects . 10)
-		    (recents . 10)))
+                     (recents . 10)))
   :init
   (dashboard-setup-startup-hook))
 
@@ -124,8 +125,8 @@
   (company-idle-delay 0)
   :bind
   (:map company-active-map
-	("C-n" . company-select-next)
-	("C-p" . company-select-previous)))
+    ("C-n" . company-select-next)
+    ("C-p" . company-select-previous)))
 
 (use-package flycheck)
 
