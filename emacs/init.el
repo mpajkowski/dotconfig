@@ -41,10 +41,9 @@
 ;; font
 (set-frame-font "Monaco 11" nil t)
 
-;; graphics
+;; ui/ux global settings
 (when (eq system-type 'linux)
   (menu-bar-mode -1))
-
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (blink-cursor-mode 0)
@@ -62,6 +61,7 @@
 (global-hl-line-mode +1)
 (setq custom-file (make-temp-file ""))
 (fset 'yes-or-no-p 'y-or-n-p)
+(setq ring-bell-function 'ignore)
 
 (use-package hybrid-reverse-theme
   :init
@@ -102,9 +102,9 @@
         doom-modeline-buffer-file-name-style  'truncate-with-project))
 
 (use-package evil
-  :custom
-  (evil-want-keybinding nil)
   :init
+  (setq evil-want-keybinding nil)
+  :config
   (evil-mode +1))
 
 (use-package evil-collection
@@ -112,38 +112,43 @@
   :init
   (evil-collection-init))
 
+
 (use-package projectile
+  :straight (projectile :type git :host github :repo "bbatsov/projectile"
+			:fork (:host github
+			       :repo "mpajkowski/projectile"
+			       :branch "fix/1777"))
   :bind
   (:map projectile-mode-map
        ("C-c p" . projectile-command-map))
   :init
-  (projectile-mode +1))
-
-(use-package neotree
-  :custom
-  (projectile-switch-project-action 'neotree-projectile-action))
+  (setq projectile-completion-system 'default)
+  :config
+  (projectile-global-mode))
 
 (use-package perspective
-  :init (persp-mode)
-  :custom
-  (persp-mode-prefix-key (kbd "C-c M-p"))
-  :config
-  (defun my/persp-neo ()
-   "Make NeoTree follow the perspective"
-   (interactive)
-   (let ((cw (selected-window))
-         (path (buffer-file-name))) ;;save current window/buffer
-         (progn
-           (when (and (fboundp 'projectile-project-p)
-                      (projectile-project-p)
-                      (fboundp 'projectile-project-root))
-             (neotree-dir (projectile-project-root)))
-           (neotree-find path))
-	 (select-window cw)))
-  :hook
-  (persp-switch . my/persp-neo))
+  :init 
+  (setq persp-mode-prefix-key (kbd "C-c M-p"))
+  (persp-mode))
 
-(use-package persp-projectile)
+(use-package treemacs
+  :config
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t))
+
+(use-package treemacs-evil
+  :after (treemacs evil))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile))
+
+(use-package treemacs-perspective
+  :after (treemacs perspective)
+  :config
+  (treemacs-set-scope-type 'Perspectives))
+
+(use-package persp-projectile
+  :after (perspective))
 
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
@@ -161,9 +166,9 @@
 (use-package company
   :hook
   (after-init . global-company-mode)
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0)
+  :config
+  (setq company-minimum-prefix-length 1)
+  (setq company-idle-delay 0)
   :bind
   (:map company-active-map
     ("C-n" . company-select-next)
@@ -175,24 +180,24 @@
   :commands (lsp lsp-deferred)
   :hook
   (lsp-mode . lsp-enable-which-key-integration)
-  :custom
-  (lsp-keymap-prefix "C-c l")
-  (lsp-enable-suggest-server-download nil)
+  :init
+  (setq lsp-auto-execute-action nil)
+  :config
+  (setq lsp-keymap-prefix "C-c l")
+  (setq lsp-enable-suggest-server-download nil)
   ;;ui
-  (lsp-eldoc-enable-hover nil)
-  (lsp-signature-auto-activate nil)
+  (setq lsp-eldoc-enable-hover nil)
+  (setq lsp-signature-auto-activate nil)
   :config
   (evil-define-key 'normal 'global (kbd "gd") 'lsp-find-definition)
   (evil-define-key 'normal 'global (kbd "ga") 'lsp-execute-code-action)
-  (evil-define-key 'normal 'global (kbd "<leader>mv") 'lsp-rename)
-  :init
-  (setq lsp-auto-execute-action nil))
+  (evil-define-key 'normal 'global (kbd "<leader>mv") 'lsp-rename))
 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-sideline-enable nil)
-  (lsp-ui-sideline-show-hover nil))
+  :config
+  (setq lsp-ui-sideline-enable nil)
+  (setq lsp-ui-sideline-show-hover nil))
 
 (use-package yasnippet
   :config
@@ -200,8 +205,13 @@
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
+
+(use-package vterm)
+
 (use-package rustic)
+(use-package scala-mode)
 (use-package toml-mode)
+(use-package yaml-mode)
 (use-package json-mode)
 
 ;; notes
@@ -209,7 +219,7 @@
 
 ;; bindings
 (evil-set-leader 'normal (kbd "SPC"))
-(evil-define-key 'normal 'global (kbd "<leader>nn") 'neotree-toggle)
+(evil-define-key 'normal 'global (kbd "<leader>nn") 'treemacs)
 (evil-define-key 'normal 'global (kbd "zs") 'save-buffer)
 
 (evil-define-key 'normal 'global (kbd "<leader>h") 'windmove-left)
@@ -221,3 +231,4 @@
 (evil-define-key 'normal 'global (kbd "TAB") 'projectile-next-project-buffer)
 (evil-define-key 'normal 'global (kbd "<backtab>") 'projectile-previous-project-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>b") 'persp-switch-to-buffer)
+(evil-define-key 'normal 'global (kbd "<leader>dg") 'lsp-ui-flycheck-list)
