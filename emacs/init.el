@@ -39,7 +39,9 @@
   (exec-path-from-shell-initialize))
 
 ;; font
-(set-frame-font "Monaco 11" nil t)
+(if (eq system-type 'darwin)
+  (set-face-attribute 'default nil :weight 'regular :font "Monaco" :height 130)
+  (set-frame-font "Monaco 12"))
 
 ;; ui/ux global settings
 (when (eq system-type 'linux)
@@ -52,7 +54,7 @@
 (setq initial-scratch-message (format ";; Scratch buffer - started on %s\n\n" (current-time-string)))
 (setq confirm-kill-emacs 'yes-or-no-p)
 (setq scroll-conservatively most-positive-fixnum)
-(setq display-line-numbers-width 3)
+(setq display-line-numbers-width 4)
 (setq display-line-numbers-type 'relative)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
@@ -63,9 +65,18 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq ring-bell-function 'ignore)
 
-(use-package hybrid-reverse-theme
-  :init
-  (load-theme 'hybrid-reverse t))
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-one t)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
+ ;; (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
 
 (use-package all-the-icons)
 
@@ -114,7 +125,9 @@
 
 
 (use-package projectile
-  :straight (projectile :type git :host github :repo "bbatsov/projectile"
+  :straight (projectile :type git
+			:host github
+			:repo "bbatsov/projectile"
 			:fork (:host github
 			       :repo "mpajkowski/projectile"
 			       :branch "fix/1777"))
@@ -180,6 +193,7 @@
   :commands (lsp lsp-deferred)
   :hook
   (lsp-mode . lsp-enable-which-key-integration)
+  (before-save . lsp-format-buffer)
   :init
   (setq lsp-auto-execute-action nil)
   :config
@@ -207,8 +221,13 @@
 
 
 (use-package vterm)
+(use-package restclient)
 
-(use-package rustic)
+(use-package rustic
+  :mode ((rx ".rs" string-end) . rustic-mode)
+  :config
+  (require 'smartparens-rust))
+
 (use-package scala-mode)
 (use-package toml-mode)
 (use-package yaml-mode)
