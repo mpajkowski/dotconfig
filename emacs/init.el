@@ -44,11 +44,12 @@
   (set-frame-font "Monaco 12"))
 
 ;; ui/ux global settings
-(when (eq system-type 'linux)
+(when (eq system-type 'gnu/linux)
   (menu-bar-mode -1))
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (blink-cursor-mode 0)
+(setq visible-cursor nil)
 (setq make-backup-files nil)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message (format ";; Scratch buffer - started on %s\n\n" (current-time-string)))
@@ -176,42 +177,21 @@
   :hook
   (smartparens-enabled . evil-smartparens-mode))
 
-(use-package company
+(use-package corfu
+  :demand t
+  :config
+  (setq corfu-auto t)
+  (global-corfu-mode +1))
+
+(use-package corfu-terminal
+  :after (corfu)
+  :config
+  (setq corfu-terminal-disable-on-gui nil)
+  (corfu-terminal-mode +1))
+
+(use-package eldoc-box
   :hook
-  (after-init . global-company-mode)
-  :config
-  (setq company-minimum-prefix-length 1)
-  (setq company-idle-delay 0)
-  :bind
-  (:map company-active-map
-    ("C-n" . company-select-next)
-    ("C-p" . company-select-previous)))
-
-(use-package flycheck)
-
-(use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :hook
-  (lsp-mode . lsp-enable-which-key-integration)
-  (before-save . lsp-format-buffer)
-  :init
-  (setq lsp-auto-execute-action nil)
-  :config
-  (setq lsp-keymap-prefix "C-c l")
-  (setq lsp-enable-suggest-server-download nil)
-  ;;ui
-  (setq lsp-eldoc-enable-hover nil)
-  (setq lsp-signature-auto-activate nil)
-  :config
-  (evil-define-key 'normal 'global (kbd "gd") 'lsp-find-definition)
-  (evil-define-key 'normal 'global (kbd "ga") 'lsp-execute-code-action)
-  (evil-define-key 'normal 'global (kbd "<leader>mv") 'lsp-rename))
-
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
-  :config
-  (setq lsp-ui-sideline-enable nil)
-  (setq lsp-ui-sideline-show-hover nil))
+  (eldoc-mode . (lambda () (eldoc-box-hover-mode t))))
 
 (use-package yasnippet
   :config
@@ -226,15 +206,16 @@
 (use-package rustic
   :mode ((rx ".rs" string-end) . rustic-mode)
   :config
+  (setq rustic-lsp-client 'eglot)
+  ;;(push 'rustic-clippy flycheck-checkers)
   (require 'smartparens-rust))
+
+(add-hook 'before-save-hook 'eglot-format t nil)
 
 (use-package scala-mode)
 (use-package toml-mode)
 (use-package yaml-mode)
 (use-package json-mode)
-
-;; notes
-;; lsp-ui-flycheck-list - show errors
 
 ;; bindings
 (evil-set-leader 'normal (kbd "SPC"))
@@ -250,4 +231,6 @@
 (evil-define-key 'normal 'global (kbd "TAB") 'projectile-next-project-buffer)
 (evil-define-key 'normal 'global (kbd "<backtab>") 'projectile-previous-project-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>b") 'persp-switch-to-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>dg") 'lsp-ui-flycheck-list)
+(evil-define-key 'normal 'global (kbd "<leader>dg") 'flymake-show-project-diagnostics)
+(evil-define-key 'normal 'global (kbd "ga") 'eglot-code-actions)
+(evil-define-key 'normal 'global (kbd "gx") 'eglot-code-action-quickfix)
