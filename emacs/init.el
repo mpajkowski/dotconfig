@@ -189,9 +189,7 @@
   (setq corfu-terminal-disable-on-gui nil)
   (corfu-terminal-mode +1))
 
-(use-package eldoc-box
-  :hook
-  (eldoc-mode . (lambda () (eldoc-box-hover-mode t))))
+(use-package eldoc-box)
 
 (use-package yasnippet
   :config
@@ -211,6 +209,9 @@
   (require 'smartparens-rust))
 
 (add-hook 'before-save-hook 'eglot-format t nil)
+(add-hook 'eglot--managed-mode-hook (lambda () (evil-define-key 'normal 'global (kbd "K") 'eldoc-box-eglot-help-at-point)))
+
+(eldoc-mode -1)
 
 (use-package scala-mode)
 (use-package toml-mode)
@@ -218,19 +219,21 @@
 (use-package json-mode)
 
 ;; bindings
-(evil-set-leader 'normal (kbd "SPC"))
-(evil-define-key 'normal 'global (kbd "<leader>nn") 'treemacs)
+(evil-set-leader (list 'normal 'motion) (kbd "SPC"))
+(evil-define-key '(normal motion) 'global (kbd "<leader>nn") 'treemacs)
 (evil-define-key 'normal 'global (kbd "zs") 'save-buffer)
 
-(evil-define-key 'normal 'global (kbd "<leader>h") 'windmove-left)
-(evil-define-key 'normal 'global (kbd "<leader>j") 'windmove-down)
-(evil-define-key 'normal 'global (kbd "<leader>k") 'windmove-up)
-(evil-define-key 'normal 'global (kbd "<leader>l") 'windmove-right)
+(evil-define-key '(normal motion) 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
+(evil-define-key '(normal motion) 'global (kbd "<leader>h") 'windmove-left)
+(evil-define-key '(normal motion) 'global (kbd "<leader>j") 'windmove-down)
+(evil-define-key '(normal motion) 'global (kbd "<leader>k") 'windmove-up)
+(evil-define-key '(normal motion) 'global (kbd "<leader>l") 'windmove-right)
 
-(evil-define-key 'normal 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
 (evil-define-key 'normal 'global (kbd "TAB") 'projectile-next-project-buffer)
 (evil-define-key 'normal 'global (kbd "<backtab>") 'projectile-previous-project-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>b") 'persp-switch-to-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>dg") 'flymake-show-project-diagnostics)
+(evil-define-key 'normal 'global (kbd "<leader>rg") 'projectile-ripgrep)
 (evil-define-key 'normal 'global (kbd "ga") 'eglot-code-actions)
 (evil-define-key 'normal 'global (kbd "gx") 'eglot-code-action-quickfix)
+(evil-define-key 'normal 'global (kbd "<leader>mv") 'eglot-rename)
