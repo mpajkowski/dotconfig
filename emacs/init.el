@@ -53,7 +53,7 @@
 (setq initial-scratch-message (format ";; Scratch buffer - started on %s\n\n" (current-time-string)))
 (setq confirm-kill-emacs 'yes-or-no-p)
 (setq scroll-conservatively most-positive-fixnum)
-(setq display-line-numbers-width 4)
+(setq display-line-numbers-width-start t)
 (setq display-line-numbers-type 'relative)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
@@ -64,18 +64,9 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq ring-bell-function 'ignore)
 
-(use-package doom-themes
-  :ensure t
+(use-package hybrid-reverse-theme
   :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-one t)
-  ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
- ;; (doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+  (load-theme 'hybrid-reverse t))
 
 (use-package all-the-icons)
 
@@ -115,6 +106,7 @@
   :init
   (setq evil-want-keybinding nil)
   :config
+  (defalias #'forward-evil-word #'forward-evil-symbol)
   (evil-mode +1))
 
 (use-package evil-collection
@@ -187,11 +179,11 @@
   (corfu-terminal-mode +1))
 
 (use-package eglot
-  :straight (:type built-in)
+  ;;:straight (:type built-in)
   :hook
   (before-save . eglot-format)
   :config
-  (setq eglot-stay-out-of 'eldoc))
+  (fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point))
 
 (add-hook 'eglot-managed-mode-hook (lambda () (eldoc-mode -1)))
 

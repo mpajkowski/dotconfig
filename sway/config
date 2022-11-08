@@ -169,6 +169,11 @@ input * {
     xkb_layout "pl"
 }
 
+input type:keyboard {
+    repeat_delay 225
+    repeat_rate 35
+}
+
 for_window [shell="xwayland" ] title_format "%title [Xwayland]"
 
 include $HOME/.local/sway_config
