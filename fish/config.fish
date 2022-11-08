@@ -5,6 +5,7 @@ fish_add_path "$HOME/.fzf/bin"
 fish_add_path "$HOME/zig"
 fish_add_path "$HOME/zls"
 fish_add_path "/snap/bin"
+fish_add_path /opt/homebrew/opt/openjdk/bin
 test -e {$HOME}/.iterm2_shell_integration.fish ; and source {$HOME}/.iterm2_shell_integration.fish
 set -gx ANDROID_SDK_ROOT "/opt/android-sdk"
 fish_add_path "$ANDROID_SDK_ROOT/platform-tools"

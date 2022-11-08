@@ -186,23 +186,16 @@
   :config
   (corfu-terminal-mode +1))
 
-(use-package kind-icon
-  :after corfu
-  :custom
-  (kind-icon-default-face 'corfu-default)
-  :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
 (use-package eglot
   :straight (:type built-in)
-  :defer t
   :hook
-  (before-save . eglot-format))
-
-(use-package eldoc-box
-  :after (eldoc)
+  (before-save . eglot-format)
   :config
-  (evil-define-key 'normal 'global (kbd "K") 'eldoc-box-eglot-help-at-point))
+  (setq eglot-stay-out-of 'eldoc))
+
+(add-hook 'eglot-managed-mode-hook (lambda () (eldoc-mode -1)))
+
+(use-package eldoc-box)
 
 (use-package yasnippet
   :config
@@ -245,3 +238,4 @@
 (evil-define-key 'normal 'global (kbd "ga") 'eglot-code-actions)
 (evil-define-key 'normal 'global (kbd "gx") 'eglot-code-action-quickfix)
 (evil-define-key 'normal 'global (kbd "<leader>mv") 'eglot-rename)
+(evil-define-key 'normal 'global (kbd "K") 'eldoc-box-eglot-help-at-point)
