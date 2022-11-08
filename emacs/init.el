@@ -39,7 +39,9 @@
   (exec-path-from-shell-initialize))
 
 ;; font
-(set-face-attribute 'default nil :weight 'regular :font "Monaco" :height (if (eq system-type 'darwin) 130 120))
+(if (eq system-type 'darwin)
+  (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 120 )
+  (set-face-attribute 'default nil :weight 'bold :font "Monaco" :height 130 ))
 
 ;; ui/ux global settings
 (when (eq system-type 'gnu/linux)
@@ -57,10 +59,10 @@
 (setq display-line-numbers-type 'relative)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
-(setq split-width-threshold 9999)
-(setq split-height-threshold nil)
 (global-hl-line-mode +1)
 (setq custom-file (make-temp-file ""))
+(setq split-width-threshold 9999)
+(setq split-height-threshold nil)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq ring-bell-function 'ignore)
 
@@ -106,7 +108,6 @@
   :init
   (setq evil-want-keybinding nil)
   :config
-  (defalias #'forward-evil-word #'forward-evil-symbol)
   (evil-mode +1))
 
 (use-package evil-collection
@@ -167,27 +168,20 @@
   :hook
   (smartparens-enabled . evil-smartparens-mode))
 
-(use-package corfu
-  :demand t
+(use-package company
   :config
-  (setq corfu-auto t)
-  (global-corfu-mode +1))
+  (global-company-mode +1))
 
-(use-package corfu-terminal
-  :after (corfu)
-  :config
-  (corfu-terminal-mode +1))
-
-(use-package eglot
-  ;;:straight (:type built-in)
+(use-package lsp-mode
   :hook
-  (before-save . eglot-format)
+  (lsp-mode . lsp-ui-mode)
   :config
-  (fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point))
+  (setq lsp-rust-analyzer-server-command "clippy"))
 
-(add-hook 'eglot-managed-mode-hook (lambda () (eldoc-mode -1)))
-
-(use-package eldoc-box)
+(use-package lsp-ui
+  :config
+  (setq lsp-ui-doc-position 'at-point)
+  (setq lsp-ui-doc-use-childframe t))
 
 (use-package yasnippet
   :config
@@ -202,7 +196,6 @@
 (use-package rustic
   :mode ((rx ".rs" string-end) . rustic-mode)
   :config
-  (setq rustic-lsp-client 'eglot)
   (require 'smartparens-rust))
 
 (use-package scala-mode)
@@ -227,7 +220,6 @@
 (evil-define-key 'normal 'global (kbd "<leader>b") 'persp-switch-to-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>dg") 'flymake-show-project-diagnostics)
 (evil-define-key 'normal 'global (kbd "<leader>rg") 'projectile-ripgrep)
-(evil-define-key 'normal 'global (kbd "ga") 'eglot-code-actions)
-(evil-define-key 'normal 'global (kbd "gx") 'eglot-code-action-quickfix)
-(evil-define-key 'normal 'global (kbd "<leader>mv") 'eglot-rename)
-(evil-define-key 'normal 'global (kbd "K") 'eldoc-box-eglot-help-at-point)
+(evil-define-key 'normal 'global (kbd "ga") 'lsp-execute-code-action)
+(evil-define-key 'normal 'global (kbd "<leader>mv") 'lsp-rename)
+(evil-define-key 'normal 'global (kbd "K") 'lsp-ui-doc-glance)
