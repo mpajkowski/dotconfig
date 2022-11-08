@@ -39,9 +39,7 @@
   (exec-path-from-shell-initialize))
 
 ;; font
-(if (eq system-type 'darwin)
-  (set-face-attribute 'default nil :weight 'regular :font "Monaco" :height 130)
-  (set-frame-font "Monaco 12"))
+(set-face-attribute 'default nil :weight 'regular :font "Monaco" :height (if (eq system-type 'darwin) 130 120))
 
 ;; ui/ux global settings
 (when (eq system-type 'gnu/linux)
@@ -141,7 +139,7 @@
   (projectile-global-mode))
 
 (use-package perspective
-  :init 
+  :init
   (setq persp-mode-prefix-key (kbd "C-c M-p"))
   (persp-mode))
 
@@ -186,10 +184,25 @@
 (use-package corfu-terminal
   :after (corfu)
   :config
-  (setq corfu-terminal-disable-on-gui nil)
   (corfu-terminal-mode +1))
 
-(use-package eldoc-box)
+(use-package kind-icon
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+(use-package eglot
+  :straight (:type built-in)
+  :defer t
+  :hook
+  (before-save . eglot-format))
+
+(use-package eldoc-box
+  :after (eldoc)
+  :config
+  (evil-define-key 'normal 'global (kbd "K") 'eldoc-box-eglot-help-at-point))
 
 (use-package yasnippet
   :config
@@ -205,18 +218,13 @@
   :mode ((rx ".rs" string-end) . rustic-mode)
   :config
   (setq rustic-lsp-client 'eglot)
-  ;;(push 'rustic-clippy flycheck-checkers)
   (require 'smartparens-rust))
-
-(add-hook 'before-save-hook 'eglot-format t nil)
-(add-hook 'eglot--managed-mode-hook (lambda () (evil-define-key 'normal 'global (kbd "K") 'eldoc-box-eglot-help-at-point)))
-
-(eldoc-mode -1)
 
 (use-package scala-mode)
 (use-package toml-mode)
 (use-package yaml-mode)
 (use-package json-mode)
+(use-package zig-mode)
 
 ;; bindings
 (evil-set-leader (list 'normal 'motion) (kbd "SPC"))
