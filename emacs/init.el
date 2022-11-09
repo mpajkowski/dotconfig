@@ -59,6 +59,7 @@
 (setq display-line-numbers-type 'relative)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
 (global-hl-line-mode +1)
 (setq custom-file (make-temp-file ""))
 (setq split-width-threshold 9999)
@@ -172,6 +173,8 @@
   :config
   (global-company-mode +1))
 
+(use-package flycheck)
+
 (use-package lsp-mode
   :hook
   (lsp-mode . lsp-ui-mode)
@@ -180,6 +183,10 @@
 
 (use-package lsp-ui
   :config
+  (setq lsp-enable-symbol-highlighting nil)
+  (setq lsp-headerline-breadcrumb-enable nil)
+  (setq lsp-edloc-enable-hover nil)
+  (setq lsp-signature-auto-activate nil)
   (setq lsp-ui-doc-position 'at-point)
   (setq lsp-ui-doc-use-childframe t))
 
@@ -197,6 +204,25 @@
   :mode ((rx ".rs" string-end) . rustic-mode)
   :config
   (require 'smartparens-rust))
+
+;;(use-package dap-mode
+;;  :ensure
+;;  :config
+;;  (dap-ui-mode)
+;;  (dap-ui-controls-mode 1)
+;;
+;;  (require 'dap-lldb)
+;;  (require 'dap-gdb-lldb)
+;;  ;; installs .extension/vscode
+;;  (dap-gdb-lldb-setup)
+;;  (dap-register-debug-template
+;;   "Rust::LLDB Run Configuration"
+;;   (list :type "lldb"
+;;         :request "launch"
+;;         :name "LLDB::Run"
+;;	 :gdbpath "rust-lldb"
+;;         :target nil
+;;         :cwd nil)))
 
 (use-package scala-mode)
 (use-package toml-mode)
@@ -218,7 +244,7 @@
 (evil-define-key 'normal 'global (kbd "TAB") 'projectile-next-project-buffer)
 (evil-define-key 'normal 'global (kbd "<backtab>") 'projectile-previous-project-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>b") 'persp-switch-to-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>dg") 'flymake-show-project-diagnostics)
+(evil-define-key 'normal 'global (kbd "<leader>dg") 'lsp-ui-flycheck-list)
 (evil-define-key 'normal 'global (kbd "<leader>rg") 'projectile-ripgrep)
 (evil-define-key 'normal 'global (kbd "ga") 'lsp-execute-code-action)
 (evil-define-key 'normal 'global (kbd "<leader>mv") 'lsp-rename)
