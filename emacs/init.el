@@ -33,15 +33,14 @@
   (after term-kill-buffer-on-exit activate)
 (kill-buffer))
 
-
 (use-package exec-path-from-shell
   :init
   (exec-path-from-shell-initialize))
 
 ;; font
 (if (eq system-type 'darwin)
-  (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 120 )
-  (set-face-attribute 'default nil :weight 'bold :font "Monaco" :height 130 ))
+  (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 130)
+  (set-face-attribute 'default nil :weight 'bold :font "Monaco" :height 120 ))
 
 ;; ui/ux global settings
 (when (eq system-type 'gnu/linux)
@@ -171,6 +170,8 @@
 
 (use-package company
   :config
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 1)
   (global-company-mode +1))
 
 (use-package flycheck)
@@ -178,14 +179,19 @@
 (use-package lsp-mode
   :hook
   (lsp-mode . lsp-ui-mode)
+  (before-save . lsp-format-buffer)
   :config
-  (setq lsp-rust-analyzer-server-command "clippy"))
+  ;; rust-analyzer
+  (setq lsp-rust-analyzer-cargo-watch-enable t)
+  (setq lsp-rust-analyzer-cargo-watch-command "clippy")
+  (setq lsp-rust-analyzer-cargo-watch-args ["--target-dir", "/tmp/rust-analyzer-check"])
+  (setq lsp-rust-analyzer-proc-macro-enable t))
 
 (use-package lsp-ui
   :config
   (setq lsp-enable-symbol-highlighting nil)
   (setq lsp-headerline-breadcrumb-enable nil)
-  (setq lsp-edloc-enable-hover nil)
+  (setq lsp-eldoc-enable-hover nil)
   (setq lsp-signature-auto-activate nil)
   (setq lsp-ui-doc-position 'at-point)
   (setq lsp-ui-doc-use-childframe t))
@@ -204,6 +210,9 @@
   :mode ((rx ".rs" string-end) . rustic-mode)
   :config
   (require 'smartparens-rust))
+
+(use-package vimrc-mode
+  :mode ((rx ".vim" string-end) . vimrc-mode))
 
 ;;(use-package dap-mode
 ;;  :ensure
