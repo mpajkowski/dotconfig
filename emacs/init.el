@@ -39,7 +39,7 @@
 
 ;; font
 (if (eq system-type 'darwin)
-  (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 130)
+  (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
   (set-face-attribute 'default nil :weight 'bold :font "Monaco" :height 120 ))
 
 ;; ui/ux global settings
@@ -181,6 +181,7 @@
   (lsp-mode . lsp-ui-mode)
   (before-save . lsp-format-buffer)
   :config
+  (setq lsp-keep-workspace-alive nil)
   ;; rust-analyzer
   (setq lsp-rust-analyzer-cargo-watch-enable t)
   (setq lsp-rust-analyzer-cargo-watch-command "clippy")
