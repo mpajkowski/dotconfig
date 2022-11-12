@@ -168,11 +168,13 @@
   :hook
   (smartparens-enabled . evil-smartparens-mode))
 
-(use-package company
+(use-package corfu
   :config
-  (setq company-idle-delay 0)
-  (setq company-minimum-prefix-length 1)
-  (global-company-mode +1))
+  (setq corfu-auto t)
+  (setq corfu-cycle t)
+  (setq corfu-auto-delay 0)
+  (setq corfu-aut-prefix 0)
+  (global-corfu-mode +1))
 
 (use-package flycheck)
 
@@ -190,12 +192,15 @@
 
 (use-package lsp-ui
   :config
+  (setq lsp-auto-execute-action nil)
   (setq lsp-enable-symbol-highlighting nil)
   (setq lsp-headerline-breadcrumb-enable nil)
   (setq lsp-eldoc-enable-hover nil)
+  (setq lsp-lens-enable nil)
+  (setq lsp-ui-sideline-enable nil)
   (setq lsp-signature-auto-activate nil)
-  (setq lsp-ui-doc-position 'at-point)
-  (setq lsp-ui-doc-use-childframe t))
+  (setq lsp-signature-render-documentation nil)
+  (setq lsp-ui-doc-position 'at-point))
 
 (use-package yasnippet
   :config
