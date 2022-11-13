@@ -58,7 +58,7 @@
 (setq display-line-numbers-type 'relative)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
-(setq read-process-output-max (* 1024 1024)) ;; 1mb
+(setq read-process-output-max (* 1024 1024 12))
 (global-hl-line-mode +1)
 (setq custom-file (make-temp-file ""))
 (setq split-width-threshold 9999)
@@ -164,10 +164,6 @@
     (smartparens-global-mode)
     (show-smartparens-global-mode t)))
 
-(use-package evil-smartparens
-  :hook
-  (smartparens-enabled . evil-smartparens-mode))
-
 (use-package corfu
   :config
   (setq corfu-auto t)
@@ -178,12 +174,18 @@
 
 (use-package flycheck)
 
+(use-package tree-sitter
+  :config
+  (global-tree-sitter-mode))
+(use-package tree-sitter-langs)
+
 (use-package lsp-mode
   :hook
   (lsp-mode . lsp-ui-mode)
   (before-save . lsp-format-buffer)
   :config
   (setq lsp-keep-workspace-alive nil)
+  (setq lsp-auto-execute-action nil)
   ;; rust-analyzer
   (setq lsp-rust-analyzer-cargo-watch-enable t)
   (setq lsp-rust-analyzer-cargo-watch-command "clippy")
@@ -192,7 +194,6 @@
 
 (use-package lsp-ui
   :config
-  (setq lsp-auto-execute-action nil)
   (setq lsp-enable-symbol-highlighting nil)
   (setq lsp-headerline-breadcrumb-enable nil)
   (setq lsp-eldoc-enable-hover nil)
@@ -251,6 +252,7 @@
 (evil-define-key 'normal 'global (kbd "zs") 'save-buffer)
 
 (evil-define-key '(normal motion) 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
+(evil-define-key '(normal motion) 'global (kbd "<leader>ff") 'projectile-find-file)
 (evil-define-key '(normal motion) 'global (kbd "<leader>h") 'windmove-left)
 (evil-define-key '(normal motion) 'global (kbd "<leader>j") 'windmove-down)
 (evil-define-key '(normal motion) 'global (kbd "<leader>k") 'windmove-up)
