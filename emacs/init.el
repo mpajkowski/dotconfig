@@ -66,12 +66,18 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq ring-bell-function 'ignore)
 (setq-default indent-tabs-mode nil)
+(setq-default mode-line-format nil) 
+(setq enable-recursive-minibuffers t)
+
+(use-package dired
+  :straight (:type built-in) 
+  :config
+  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file) ; was dired-advertised-find-file
+  (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file ".."))))  ; was dired-up-directory
 
 (use-package hybrid-reverse-theme
   :config
   (load-theme 'hybrid-reverse t))
-
-(use-package all-the-icons)
 
 ;; gc
 (use-package gcmh
@@ -81,29 +87,23 @@
 ;; search
 (setq completion-styles '(partial-completion substring initials flex))
 
-(setq completion-category-overrides
-  '((file (styles . (partial-completion substring)))
-    (buffer (styles . ( basic substring partial-completion)))
-    (project-file (styles . (partial-completion substring)))
-    (info-menu (styles . (substring)))))
-
-(use-package selectrum
+(use-package vertico
   :init
-  (selectrum-mode +1))
+  (vertico-mode))
+
+(use-package vertico-posframe
+  :init
+  (vertico-posframe-mode))
+
+(use-package savehist
+  :init
+  (savehist-mode))
 
 (use-package rg)
 
 (use-package which-key
   :init
   (which-key-mode))
-
-(use-package doom-modeline
-  :hook (after-init . doom-modeline-mode)
-  :config
-  (setq doom-modeline-persp-name              nil
-        doom-modeline-buffer-encoding         nil
-        doom-modeline-icon                    t
-        doom-modeline-buffer-file-name-style  'truncate-with-project))
 
 (use-package evil
   :init
@@ -117,7 +117,6 @@
   :init
   (evil-collection-init))
 
-
 (use-package projectile
   :straight (projectile :type git
 			:host github
@@ -125,9 +124,6 @@
 			:fork (:host github
 			       :repo "mpajkowski/projectile"
 			       :branch "fix/1777"))
-  :bind
-  (:map projectile-mode-map
-       ("C-c p" . projectile-command-map))
   :init
   (setq projectile-completion-system 'default)
   :config
@@ -138,31 +134,11 @@
   (setq persp-mode-prefix-key (kbd "C-c M-p"))
   (persp-mode))
 
-(use-package treemacs
-  :config
-  (treemacs-follow-mode t)
-  (treemacs-filewatch-mode t))
-
-(use-package treemacs-evil
-  :after (treemacs evil))
-
-(use-package treemacs-projectile
-  :after (treemacs projectile))
-
-(use-package treemacs-perspective
-  :after (treemacs perspective)
-  :config
-  (treemacs-set-scope-type 'Perspectives))
-
 (use-package persp-projectile
   :after (perspective))
 
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
-
-(use-package smartparens
-  :config
-  (smartparens-global-mode))
 
 (use-package corfu
   :config
@@ -172,20 +148,18 @@
   (setq corfu-auto-prefix 0)
   (global-corfu-mode +1))
 
-(use-package flycheck)
-
 (use-package tree-sitter
   :config
   (global-tree-sitter-mode))
 (use-package tree-sitter-langs)
 
-(add-hook 'before-save-hook 'eglot-format nil t)
+(add-hook 'before-save-hook 'eglot-format-buffer nil t)
 (add-hook 'eglot-managed-mode-hook (lambda () (eldoc-mode -1)))
 
 (setq eglot-workspace-configuration '(:rust-analyzer (:checkOnSave (:enable t
-								     :command "clippy"
-								     :extraArgs ["--target-dir" "/tmp/rust-analyzer-check"])
-	    					       :cargo (:features "all"))))
+                                                                    :command "clippy"
+                                                                    :extraArgs ["--target-dir" "/tmp/rust-analyzer-check"])
+                                                      :cargo (:features "all"))))
 
 (defun flymake-clear-diagnostics ()
   "Removes diagnostics list"
@@ -208,11 +182,12 @@
 (use-package rustic
   :mode ((rx ".rs" string-end) . rustic-mode)
   :config
-  (setq rustic-lsp-client 'eglot)
-  (require 'smartparens-rust))
+  (setq rustic-lsp-client 'eglot))
 
 (use-package vimrc-mode
   :mode ((rx ".vim" string-end) . vimrc-mode))
+
+(use-package magit)
 
 (use-package scala-mode)
 (use-package toml-mode)
@@ -222,11 +197,11 @@
 
 ;; bindings
 (evil-set-leader (list 'normal 'motion) (kbd "SPC"))
-(evil-define-key '(normal motion) 'global (kbd "<leader>nn") 'treemacs)
 (evil-define-key 'normal 'global (kbd "zs") 'save-buffer)
 
 (evil-define-key '(normal motion) 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
 (evil-define-key '(normal motion) 'global (kbd "<leader>ff") 'projectile-find-file)
+(evil-define-key '(normal motion) 'global (kbd "<leader>xp") 'projectile-dired)
 (evil-define-key '(normal motion) 'global (kbd "<leader>h") 'windmove-left)
 (evil-define-key '(normal motion) 'global (kbd "<leader>j") 'windmove-down)
 (evil-define-key '(normal motion) 'global (kbd "<leader>k") 'windmove-up)
