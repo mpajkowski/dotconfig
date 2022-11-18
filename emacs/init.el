@@ -38,9 +38,10 @@
   (exec-path-from-shell-initialize))
 
 ;; font
-(if (eq system-type 'darwin)
-  (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
-  (set-face-attribute 'default nil :weight 'bold :font "Monaco" :height 120 ))
+(when (display-graphic-p) 
+    (if (eq system-type 'darwin)
+    (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
+    (set-face-attribute 'default nil :weight 'bold :font "Monaco" :height 120 )))
 
 ;; ui/ux global settings
 (when (eq system-type 'gnu/linux)
@@ -49,7 +50,6 @@
 (scroll-bar-mode -1)
 (blink-cursor-mode 0)
 (setq visible-cursor nil)
-(setq make-backup-files nil)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message (format ";; Scratch buffer - started on %s\n\n" (current-time-string)))
 (setq confirm-kill-emacs 'yes-or-no-p)
@@ -65,6 +65,7 @@
 (setq split-height-threshold nil)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq ring-bell-function 'ignore)
+(setq-default indent-tabs-mode nil)
 
 (use-package hybrid-reverse-theme
   :config
@@ -107,6 +108,7 @@
 (use-package evil
   :init
   (setq evil-want-keybinding nil)
+  (setq evil-undo-system 'undo-redo)
   :config
   (evil-mode +1))
 
@@ -160,16 +162,14 @@
 
 (use-package smartparens
   :config
-  (progn
-    (smartparens-global-mode)
-    (show-smartparens-global-mode t)))
+  (smartparens-global-mode))
 
 (use-package corfu
   :config
   (setq corfu-auto t)
   (setq corfu-cycle t)
-  (setq corfu-auto-delay 0)
-  (setq corfu-aut-prefix 0)
+  (setq corfu-auto-delay 0.1)
+  (setq corfu-auto-prefix 0)
   (global-corfu-mode +1))
 
 (use-package flycheck)
@@ -179,29 +179,22 @@
   (global-tree-sitter-mode))
 (use-package tree-sitter-langs)
 
-(use-package lsp-mode
-  :hook
-  (lsp-mode . lsp-ui-mode)
-  (before-save . lsp-format-buffer)
-  :config
-  (setq lsp-keep-workspace-alive nil)
-  (setq lsp-auto-execute-action nil)
-  ;; rust-analyzer
-  (setq lsp-rust-analyzer-cargo-watch-enable t)
-  (setq lsp-rust-analyzer-cargo-watch-command "clippy")
-  (setq lsp-rust-analyzer-cargo-watch-args ["--target-dir", "/tmp/rust-analyzer-check"])
-  (setq lsp-rust-analyzer-proc-macro-enable t))
+(add-hook 'before-save-hook 'eglot-format nil t)
+(add-hook 'eglot-managed-mode-hook (lambda () (eldoc-mode -1)))
 
-(use-package lsp-ui
-  :config
-  (setq lsp-enable-symbol-highlighting nil)
-  (setq lsp-headerline-breadcrumb-enable nil)
-  (setq lsp-eldoc-enable-hover nil)
-  (setq lsp-lens-enable nil)
-  (setq lsp-ui-sideline-enable nil)
-  (setq lsp-signature-auto-activate nil)
-  (setq lsp-signature-render-documentation nil)
-  (setq lsp-ui-doc-position 'at-point))
+(setq eglot-workspace-configuration '(:rust-analyzer (:checkOnSave (:enable t
+								     :command "clippy"
+								     :extraArgs ["--target-dir" "/tmp/rust-analyzer-check"])
+	    					       :cargo (:features "all"))))
+
+(defun flymake-clear-diagnostics ()
+  "Removes diagnostics list"
+  (interactive)
+  (setq flymake-list-only-diagnostics '()))
+
+(use-package eldoc-box)
+
+(fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point)
 
 (use-package yasnippet
   :config
@@ -209,36 +202,17 @@
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
-
 (use-package vterm)
 (use-package restclient)
 
 (use-package rustic
   :mode ((rx ".rs" string-end) . rustic-mode)
   :config
+  (setq rustic-lsp-client 'eglot)
   (require 'smartparens-rust))
 
 (use-package vimrc-mode
   :mode ((rx ".vim" string-end) . vimrc-mode))
-
-;;(use-package dap-mode
-;;  :ensure
-;;  :config
-;;  (dap-ui-mode)
-;;  (dap-ui-controls-mode 1)
-;;
-;;  (require 'dap-lldb)
-;;  (require 'dap-gdb-lldb)
-;;  ;; installs .extension/vscode
-;;  (dap-gdb-lldb-setup)
-;;  (dap-register-debug-template
-;;   "Rust::LLDB Run Configuration"
-;;   (list :type "lldb"
-;;         :request "launch"
-;;         :name "LLDB::Run"
-;;	 :gdbpath "rust-lldb"
-;;         :target nil
-;;         :cwd nil)))
 
 (use-package scala-mode)
 (use-package toml-mode)
@@ -261,8 +235,9 @@
 (evil-define-key 'normal 'global (kbd "TAB") 'projectile-next-project-buffer)
 (evil-define-key 'normal 'global (kbd "<backtab>") 'projectile-previous-project-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>b") 'persp-switch-to-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>dg") 'lsp-ui-flycheck-list)
+(evil-define-key 'normal 'global (kbd "<leader>dg") 'flymake-show-project-diagnostics)
 (evil-define-key 'normal 'global (kbd "<leader>rg") 'projectile-ripgrep)
-(evil-define-key 'normal 'global (kbd "ga") 'lsp-execute-code-action)
-(evil-define-key 'normal 'global (kbd "<leader>mv") 'lsp-rename)
-(evil-define-key 'normal 'global (kbd "K") 'lsp-ui-doc-glance)
+(evil-define-key 'normal 'global (kbd "ga") 'eglot-code-actions)
+(evil-define-key 'normal 'global (kbd "<leader>mv") 'eglot-rename)
+(evil-define-key 'normal 'global (kbd "K") 'eldoc-doc-buffer)
+(evil-define-key 'normal 'global (kbd "<leader>cl") 'flymake-clear-diagnostics)
