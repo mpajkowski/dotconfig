@@ -14,7 +14,8 @@
 (when (eq system-type 'darwin)
   (customize-set-variable 'native-comp-driver-options '("-Wl,-w"))
   (setq mac-option-modifier 'alt)
-  (setq mac-command-modifier 'meta))
+  (setq mac-command-modifier 'meta)
+  (add-hook 'window-setup-hook 'toggle-frame-maximized t))
 
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default +1)
@@ -39,7 +40,7 @@
   (exec-path-from-shell-initialize))
 
 ;; font
-(when (display-graphic-p) 
+(when (display-graphic-p)
     (if (eq system-type 'darwin)
     (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
     (set-face-attribute 'default nil :weight 'bold :font "Monaco" :height 120 )))
@@ -67,11 +68,12 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq ring-bell-function 'ignore)
 (setq-default indent-tabs-mode nil)
-(setq-default mode-line-format nil) 
+(setq-default mode-line-format nil)
 (setq enable-recursive-minibuffers t)
+(setq make-backup-files nil)
 
 (use-package dired
-  :straight (:type built-in) 
+  :straight (:type built-in)
   :config
   (setq dired-kill-when-opening-new-dired-buffer t)
   (put 'dired-find-alternate-file 'disabled nil)
@@ -93,10 +95,6 @@
 (use-package vertico
   :init
   (vertico-mode))
-
-(use-package vertico-posframe
-  :init
-  (vertico-posframe-mode))
 
 (use-package savehist
   :init
@@ -147,8 +145,8 @@
   :config
   (setq corfu-auto t)
   (setq corfu-cycle t)
-  (setq corfu-auto-delay 0.3)
-  (setq corfu-auto-prefix 2)
+  (setq corfu-auto-delay 0.01)
+  (setq corfu-auto-prefix 1)
   (global-corfu-mode +1))
 
 
@@ -158,7 +156,6 @@
 
 (use-package tree-sitter-langs
   :after tree-sitter)
-  
 
 (add-hook 'eglot-managed-mode-hook (lambda () (eldoc-mode -1)))
 
