@@ -27,6 +27,7 @@
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system        'utf-8)
 (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+(setq auto-window-vscroll nil)
 
 ;; kll term on exit
 (defadvice term-handle-exit
@@ -72,8 +73,10 @@
 (use-package dired
   :straight (:type built-in) 
   :config
-  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file) ; was dired-advertised-find-file
-  (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file ".."))))  ; was dired-up-directory
+  (setq dired-kill-when-opening-new-dired-buffer t)
+  (put 'dired-find-alternate-file 'disabled nil)
+  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+  (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file ".."))))
 
 (use-package hybrid-reverse-theme
   :config
@@ -144,16 +147,19 @@
   :config
   (setq corfu-auto t)
   (setq corfu-cycle t)
-  (setq corfu-auto-delay 0.1)
-  (setq corfu-auto-prefix 0)
+  (setq corfu-auto-delay 0.3)
+  (setq corfu-auto-prefix 2)
   (global-corfu-mode +1))
 
-(use-package tree-sitter
-  :config
-  (global-tree-sitter-mode))
-(use-package tree-sitter-langs)
 
-(add-hook 'before-save-hook 'eglot-format-buffer nil t)
+(use-package tree-sitter
+  :hook
+  (rustic-mode . tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :after tree-sitter)
+  
+
 (add-hook 'eglot-managed-mode-hook (lambda () (eldoc-mode -1)))
 
 (setq eglot-workspace-configuration '(:rust-analyzer (:checkOnSave (:enable t
@@ -176,24 +182,70 @@
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
-(use-package vterm)
-(use-package restclient)
+(use-package vterm
+  :defer t)
+(use-package restclient
+  :defer t)
 
 (use-package rustic
+  :defer t
+  :hook
+  (before-save . eglot-format-buffer)
   :mode ((rx ".rs" string-end) . rustic-mode)
   :config
   (setq rustic-lsp-client 'eglot))
 
 (use-package vimrc-mode
+  :defer t
   :mode ((rx ".vim" string-end) . vimrc-mode))
 
-(use-package magit)
+(use-package magit
+  :defer t)
 
-(use-package scala-mode)
-(use-package toml-mode)
-(use-package yaml-mode)
-(use-package json-mode)
-(use-package zig-mode)
+(use-package osm
+  :defer t
+  :bind (("C-c m h" . osm-home)
+	 ("C-c m s" . osm-search)
+	 ("C-c m v" . osm-server)
+	 ("C-c m t" . osm-goto)
+	 ("C-c m x" . osm-gpx-show)
+	 ("C-c m j" . osm-bookmark-jump))
+
+  :config
+  (setq osm-server 'default)
+  (setq osm-copyright nil))
+
+(use-package scala-mode
+  :defer t)
+
+(use-package toml-mode
+  :defer t)
+
+(use-package yaml-mode
+  :defer t)
+
+(use-package json-mode
+  :defer t)
+
+(use-package zig-mode
+  :defer t
+  :hook
+  (zig-mode . eglot-ensure))
+
+(use-package c++-mode
+  :straight (:type built-in)
+  :defer t
+  :hook
+  (c++-mode . eglot-ensure))
+
+(use-package c-mode
+  :straight (:type built-in)
+  :defer t
+  :hook
+  (c-mode . eglot-ensure))
+
+(use-package csv-mode
+  :defer t)
 
 ;; bindings
 (evil-set-leader (list 'normal 'motion) (kbd "SPC"))
@@ -216,3 +268,7 @@
 (evil-define-key 'normal 'global (kbd "<leader>mv") 'eglot-rename)
 (evil-define-key 'normal 'global (kbd "K") 'eldoc-doc-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>cl") 'flymake-clear-diagnostics)
+
+(evil-define-key 'normal 'global (kbd "C-n") 'company-select-next)
+(evil-define-key 'normal 'global (kbd "C-p") 'company-select-previous)
+
