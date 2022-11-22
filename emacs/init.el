@@ -90,11 +90,11 @@
   (gcmh-mode +1))
 
 ;; search
-(setq completion-styles '(partial-completion substring initials flex))
+(setq completion-styles '(basic substring partial-completion flex))
 
 (use-package vertico
   :init
-  (vertico-mode))
+  (vertico-mode +1))
 
 (use-package savehist
   :init
@@ -145,24 +145,30 @@
   :config
   (setq corfu-auto t)
   (setq corfu-cycle t)
-  (setq corfu-auto-delay 0.01)
+  (setq corfu-auto-delay 0.5)
   (setq corfu-auto-prefix 1)
   (global-corfu-mode +1))
 
 
 (use-package tree-sitter
   :hook
-  (rustic-mode . tree-sitter-hl-mode))
+  (tree-sitter-after-on . tree-sitter-hl-mode)
+  :init
+  (global-tree-sitter-mode))
 
 (use-package tree-sitter-langs
   :after tree-sitter)
 
-(add-hook 'eglot-managed-mode-hook (lambda () (eldoc-mode -1)))
-
-(setq eglot-workspace-configuration '(:rust-analyzer (:checkOnSave (:enable t
-                                                                    :command "clippy"
-                                                                    :extraArgs ["--target-dir" "/tmp/rust-analyzer-check"])
-                                                      :cargo (:features "all"))))
+(use-package eglot
+  :straight (:type built-in)
+  :hook
+  (eglot-managed-mode . (lambda () (eldoc-mode -1)))
+  :config
+  (setq eglot-stay-out-of '(eldoc))
+  (setq eglot-workspace-configuration '(:rust-analyzer (:checkOnSave (:enable t
+                                                                      :command "clippy"
+                                                                      :extraArgs ["--target-dir" "/tmp/rust-analyzer-check"])
+                                                        :cargo (:features "all")))))
 
 (defun flymake-clear-diagnostics ()
   "Removes diagnostics list"
