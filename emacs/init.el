@@ -109,14 +109,17 @@
 (use-package evil
   :init
   (setq evil-want-keybinding nil)
+  (setq evil-want-integration t)
   (setq evil-undo-system 'undo-redo)
   :config
   (evil-mode +1))
 
 (use-package evil-collection
-  :after evil
+  :after (evil)
   :init
-  (evil-collection-init))
+  (evil-collection-init)
+  :config
+  (evil-define-key 'normal 'global (kbd "SPC") 'evil-send-leader))
 
 (use-package projectile
   :straight (projectile :type git
@@ -141,13 +144,9 @@
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
-(use-package corfu
+(use-package company
   :config
-  (setq corfu-auto t)
-  (setq corfu-cycle t)
-  (setq corfu-auto-delay 0.5)
-  (setq corfu-auto-prefix 1)
-  (global-corfu-mode +1))
+  (global-company-mode +1))
 
 
 (use-package tree-sitter
@@ -256,7 +255,7 @@
 
 (evil-define-key '(normal motion) 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
 (evil-define-key '(normal motion) 'global (kbd "<leader>ff") 'projectile-find-file)
-(evil-define-key '(normal motion) 'global (kbd "<leader>xp") 'projectile-dired)
+(evil-define-key '(normal motion) 'global (kbd "<leader>nn") 'projectile-dired)
 (evil-define-key '(normal motion) 'global (kbd "<leader>h") 'windmove-left)
 (evil-define-key '(normal motion) 'global (kbd "<leader>j") 'windmove-down)
 (evil-define-key '(normal motion) 'global (kbd "<leader>k") 'windmove-up)
