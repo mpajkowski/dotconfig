@@ -71,6 +71,9 @@
 (setq-default mode-line-format nil)
 (setq enable-recursive-minibuffers t)
 (setq make-backup-files nil)
+(setq global-auto-revert-non-file-buffers t)
+(global-auto-revert-mode t)
+(setq auto-revert-verbose nil)
 
 (use-package dired
   :straight (:type built-in)
