@@ -141,6 +141,22 @@
 (use-package persp-projectile
   :after (perspective))
 
+(use-package treemacs
+  :config
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t))
+
+(use-package treemacs-evil
+  :after (treemacs evil))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile))
+
+(use-package treemacs-perspective
+  :after (treemacs perspective)
+  :config
+  (treemacs-set-scope-type 'Perspectives))
+
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
@@ -164,7 +180,7 @@
   (eglot-managed-mode . (lambda () (eldoc-mode -1)))
   :config
   (setq eglot-stay-out-of '(eldoc))
-  (setq eglot-workspace-configuration '(:rust-analyzer (:checkOnSave (:enable t
+  (setq-default eglot-workspace-configuration '(:rust-analyzer (:checkOnSave (:enable t
                                                                       :command "clippy"
                                                                       :extraArgs ["--target-dir" "/tmp/rust-analyzer-check"])
                                                         :cargo (:features "all")))))
@@ -173,6 +189,8 @@
   "Removes diagnostics list"
   (interactive)
   (setq flymake-list-only-diagnostics '()))
+
+(advice-add 'flymake-show-project-diagnostics :before 'flymake-clear-diagnostics)
 
 (use-package eldoc-box)
 
@@ -255,7 +273,7 @@
 
 (evil-define-key '(normal motion) 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
 (evil-define-key '(normal motion) 'global (kbd "<leader>ff") 'projectile-find-file)
-(evil-define-key '(normal motion) 'global (kbd "<leader>nn") 'projectile-dired)
+(evil-define-key '(normal motion) 'global (kbd "<leader>nn") 'treemacs)
 (evil-define-key '(normal motion) 'global (kbd "<leader>h") 'windmove-left)
 (evil-define-key '(normal motion) 'global (kbd "<leader>j") 'windmove-down)
 (evil-define-key '(normal motion) 'global (kbd "<leader>k") 'windmove-up)
