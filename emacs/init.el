@@ -68,9 +68,9 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq ring-bell-function 'ignore)
 (setq-default indent-tabs-mode nil)
-(setq-default mode-line-format nil)
 (setq enable-recursive-minibuffers t)
 (setq make-backup-files nil)
+(setq delete-auto-save-files t)
 (setq global-auto-revert-non-file-buffers t)
 (global-auto-revert-mode t)
 (setq auto-revert-verbose nil)
@@ -108,6 +108,14 @@
 (use-package which-key
   :init
   (which-key-mode))
+
+(use-package doom-modeline
+  :hook (after-init . doom-modeline-mode)
+  :config
+  (setq doom-modeline-persp-name              nil
+        doom-modeline-buffer-encoding         nil
+        doom-modeline-icon                    t
+        doom-modeline-buffer-file-name-style  'truncate-with-project))
 
 (use-package evil
   :init
