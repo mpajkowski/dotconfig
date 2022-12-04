@@ -15,7 +15,6 @@
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
 (setq read-process-output-max (* 1024 1024 12))
-(global-hl-line-mode +1)
 (setq custom-file (make-temp-file ""))
 (setq split-width-threshold 9999)
 (setq split-height-threshold nil)
@@ -28,6 +27,9 @@
 (setq global-auto-revert-non-file-buffers t)
 (global-auto-revert-mode t)
 (setq auto-revert-verbose nil)
+
+(add-hook 'prog-mode-hook 'hl-line-mode)
+(add-hook 'text-mode-hook 'hl-line-mode)
 
 ;; autosave
 (setq backup-by-copying t
@@ -138,7 +140,6 @@
   (setq evil-want-integration t)
   (setq evil-undo-system 'undo-redo)
   :config
-  (evil-set-initial-state 'vterm-mode 'emacs)
   (evil-mode +1))
 
 (use-package evil-numbers
@@ -249,7 +250,42 @@
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
 (use-package vterm
-  :defer t)
+  :defer t
+  :config
+  (add-hook 'vterm-mode-hook 'evil-emacs-state))
+
+(use-package multi-vterm
+  :defer t
+  :config
+  (add-hook 'vterm-mode-hook
+                  (lambda ()
+                  (setq-local evil-insert-state-cursor 'box)
+                  (evil-insert-state)))
+  (define-key vterm-mode-map [return]                      #'vterm-send-return)
+
+  (setq vterm-keymap-exceptions nil)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-e")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-f")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-a")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-v")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-b")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-w")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-u")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-n")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-m")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-p")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-j")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-k")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-r")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-t")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-g")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-c")      #'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-SPC")    #'vterm--self-insert)
+  (evil-define-key 'normal vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
+  (evil-define-key 'normal vterm-mode-map (kbd "i")        #'evil-insert-resume)
+  (evil-define-key 'normal vterm-mode-map (kbd "o")        #'evil-insert-resume)
+  (evil-define-key 'normal vterm-mode-map (kbd "<return>") #'evil-insert-resume))
 
 (use-package restclient
   :defer t)
@@ -322,6 +358,7 @@
 (evil-define-key '(normal motion) 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
 (evil-define-key '(normal motion) 'global (kbd "<leader>ff") 'projectile-find-file)
 (evil-define-key '(normal motion) 'global (kbd "<leader>nn") 'treemacs)
+(evil-define-key '(normal motion) 'global (kbd "<leader>tt") 'multi-vterm-project)
 (evil-define-key '(normal motion) 'global (kbd "<leader>h") 'windmove-left)
 (evil-define-key '(normal motion) 'global (kbd "<leader>j") 'windmove-down)
 (evil-define-key '(normal motion) 'global (kbd "<leader>k") 'windmove-up)
