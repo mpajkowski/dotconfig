@@ -1,3 +1,51 @@
+;; initialize straight
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+;; mac
+(when (eq system-type 'darwin)
+  (customize-set-variable 'native-comp-driver-options '("-Wl,-w"))
+  (setq mac-option-modifier 'alt)
+  (setq mac-command-modifier 'meta))
+
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default +1)
+
+;; utf8
+(set-charset-priority 'unicode)
+(setq locale-coding-system   'utf-8)
+(set-terminal-coding-system  'utf-8)
+(set-keyboard-coding-system  'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system        'utf-8)
+(setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+(setq auto-window-vscroll nil)
+
+;; kill term on exit
+(defadvice term-handle-exit
+  (after term-kill-buffer-on-exit activate)
+(kill-buffer))
+
+(use-package exec-path-from-shell
+  :init
+  (exec-path-from-shell-initialize))
+
+;; font
+(when (display-graphic-p)
+    (if (eq system-type 'darwin)
+    (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
+    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 120 )))
+
 ;; ui/ux global settings
 (when (eq system-type 'gnu/linux)
   (menu-bar-mode -1))
@@ -40,54 +88,6 @@
       version-control t)
 (setq auto-save-file-name-transforms
       `((".*" "~/.emacs-saves/" t)))
-
-;; font
-(when (display-graphic-p)
-    (if (eq system-type 'darwin)
-    (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
-    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 120 )))
-
-;; utf8
-(set-charset-priority 'unicode)
-(setq locale-coding-system   'utf-8)
-(set-terminal-coding-system  'utf-8)
-(set-keyboard-coding-system  'utf-8)
-(set-selection-coding-system 'utf-8)
-(prefer-coding-system        'utf-8)
-(setq default-process-coding-system '(utf-8-unix . utf-8-unix))
-(setq auto-window-vscroll nil)
-
-;; mac keys
-(when (eq system-type 'darwin)
-  (customize-set-variable 'native-comp-driver-options '("-Wl,-w"))
-  (setq mac-option-modifier 'alt)
-  (setq mac-command-modifier 'meta))
-
-;; initialize straight
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default +1)
-
-;; kill term on exit
-(defadvice term-handle-exit
-  (after term-kill-buffer-on-exit activate)
-(kill-buffer))
-
-(use-package exec-path-from-shell
-  :init
-  (exec-path-from-shell-initialize))
 
 (use-package dired
   :straight (:type built-in)
