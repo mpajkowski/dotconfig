@@ -75,6 +75,7 @@
 (setq global-auto-revert-non-file-buffers t)
 (global-auto-revert-mode t)
 (setq auto-revert-verbose nil)
+(setq column-number-mode t)
 
 (add-hook 'prog-mode-hook 'hl-line-mode)
 (add-hook 'text-mode-hook 'hl-line-mode)
@@ -154,6 +155,16 @@
   :config
   (evil-define-key 'normal 'global (kbd "SPC") 'evil-send-leader))
 
+(use-package corfu
+  :init
+  (setq corfu-cycle t
+        corfu-auto t
+        corfu-auto-delay 0
+        corfu-auto-prefix 0
+        corfu-quit-no-match 'separator
+        corfu-preselect-first nil)
+  (global-corfu-mode +1))
+
 (use-package projectile
   :straight (projectile :type git
                         :host github
@@ -206,11 +217,6 @@
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
-(use-package company
-  :config
-  (global-company-mode +1))
-
-
 (use-package tree-sitter
   :hook
   (tree-sitter-after-on . tree-sitter-hl-mode)
@@ -236,8 +242,6 @@
   "Removes diagnostics list"
   (interactive)
   (setq flymake-list-only-diagnostics '()))
-
-(advice-add 'flymake-show-project-diagnostics :before 'flymake-clear-diagnostics)
 
 (use-package eldoc-box)
 
