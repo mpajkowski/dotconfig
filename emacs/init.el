@@ -43,7 +43,7 @@
 ;; font
 (when (display-graphic-p)
     (if (eq system-type 'darwin)
-    (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
+    (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 120)
     (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 120 )))
 
 ;; ui/ux global settings
@@ -79,6 +79,8 @@
 
 (add-hook 'prog-mode-hook 'hl-line-mode)
 (add-hook 'text-mode-hook 'hl-line-mode)
+
+(modify-syntax-entry ?_ "w")
 
 ;; autosave
 (setq backup-by-copying t
@@ -144,24 +146,22 @@
   (evil-mode +1))
 
 (use-package evil-numbers
+  :after (evil)
   :config
   (evil-define-key '(normal visual) 'global (kbd "C-c =") 'evil-numbers/inc-at-pt)
   (evil-define-key '(normal visual) 'global (kbd "C-c -") 'evil-numbers/dec-at-pt))
 
 (use-package evil-collection
   :after (evil)
-  :init
-  (evil-collection-init)
   :config
-  (evil-define-key 'normal 'global (kbd "SPC") 'evil-send-leader))
+  (evil-collection-init))
 
 (use-package corfu
   :init
   (setq corfu-cycle t
         corfu-auto t
         corfu-auto-delay 0
-        corfu-auto-prefix 0
-        corfu-quit-no-match 'separator
+        corfu-auto-prefix 1
         corfu-preselect-first nil)
   (global-corfu-mode +1))
 
