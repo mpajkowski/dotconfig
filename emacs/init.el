@@ -213,18 +213,13 @@
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
 
-
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
-(use-package tree-sitter
-  :hook
-  (tree-sitter-after-on . tree-sitter-hl-mode)
+(use-package treesit
+  :straight (:type built-in)
   :init
-  (global-tree-sitter-mode))
-
-(use-package tree-sitter-langs
-  :after tree-sitter)
+  (setq treesit-extra-load-path '("/usr/local/lib")))
 
 (use-package eglot
   :straight (:type built-in)
@@ -237,11 +232,6 @@
                                                 :command "clippy"
                                                 :extraArgs ["--target-dir" "/tmp/rust-analyzer-check"])
                                   :cargo (:features "all")))))
-
-(defun flymake-clear-diagnostics ()
-  "Removes diagnostics list"
-  (interactive)
-  (setq flymake-list-only-diagnostics '()))
 
 (use-package eldoc-box)
 
@@ -298,7 +288,7 @@
   :defer t
   :hook
   (before-save . eglot-format-buffer)
-  :mode ((rx ".rs" string-end) . rustic-mode)
+  (rustic-mode . eglot-ensure)
   :config
   (setq rustic-default-test-arguments "--benches --tests --all-features -- --nocapture")
   (setq rustic-lsp-client 'eglot))
@@ -376,7 +366,6 @@
 (evil-define-key 'normal 'global (kbd "ga") 'eglot-code-actions)
 (evil-define-key 'normal 'global (kbd "<leader>mv") 'eglot-rename)
 (evil-define-key 'normal 'global (kbd "K") 'eldoc-doc-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>cl") 'flymake-clear-diagnostics)
 
 (evil-define-key 'normal 'global (kbd "C-n") 'company-select-next)
 (evil-define-key 'normal 'global (kbd "C-p") 'company-select-previous)
