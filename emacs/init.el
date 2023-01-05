@@ -43,8 +43,8 @@
 ;; font
 (when (display-graphic-p)
     (if (eq system-type 'darwin)
-    (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 120)
-    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 120 )))
+    (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
+    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 140 )))
 
 ;; ui/ux global settings
 (when (eq system-type 'gnu/linux)
@@ -77,8 +77,7 @@
 (setq auto-revert-verbose nil)
 (setq column-number-mode t)
 
-(add-hook 'prog-mode-hook 'hl-line-mode)
-(add-hook 'text-mode-hook 'hl-line-mode)
+(global-hl-line-mode)
 
 (modify-syntax-entry ?_ "w")
 
@@ -237,6 +236,11 @@
 
 (fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point)
 
+(defun flymake-clear-diagnostics ()
+  "Removes diagnostics list"
+  (interactive)
+  (setq flymake-list-only-diagnostics '()))
+
 (use-package yasnippet
   :config
   (yas-reload-all)
@@ -366,6 +370,7 @@
 (evil-define-key 'normal 'global (kbd "ga") 'eglot-code-actions)
 (evil-define-key 'normal 'global (kbd "<leader>mv") 'eglot-rename)
 (evil-define-key 'normal 'global (kbd "K") 'eldoc-doc-buffer)
+(evil-define-key 'normal 'global (kbd "<leader>cl") 'flymake-clear-diagnostics)
 
 (evil-define-key 'normal 'global (kbd "C-n") 'company-select-next)
 (evil-define-key 'normal 'global (kbd "C-p") 'company-select-previous)
