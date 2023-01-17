@@ -155,14 +155,11 @@
   :config
   (evil-collection-init))
 
-(use-package corfu
-  :init
-  (setq corfu-cycle t
-        corfu-auto t
-        corfu-auto-delay 0
-        corfu-auto-prefix 1
-        corfu-preselect-first nil)
-  (global-corfu-mode +1))
+(use-package company
+  :config
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0)
+  (global-company-mode))
 
 (use-package projectile
   :straight (projectile :type git
@@ -218,7 +215,7 @@
 (use-package treesit
   :straight (:type built-in)
   :init
-  (setq treesit-extra-load-path '("/usr/local/lib")))
+  (setq treesit-extra-load-path '("/usr/local/lib" "~/.config/treesit")))
 
 (use-package eglot
   :straight (:type built-in)
@@ -294,8 +291,8 @@
   (before-save . eglot-format-buffer)
   (rustic-mode . eglot-ensure)
   :config
-  (setq rustic-default-test-arguments "--benches --tests --all-features -- --nocapture")
-  (setq rustic-lsp-client 'eglot))
+  (setq rustic-lsp-client 'eglot)
+  (setq rustic-default-test-arguments "--benches --tests --all-features -- --nocapture"))
 
 (use-package vimrc-mode
   :defer t
