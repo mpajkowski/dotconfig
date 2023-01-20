@@ -44,7 +44,7 @@
 (when (display-graphic-p)
     (if (eq system-type 'darwin)
     (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
-    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 140 )))
+    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 110 )))
 
 ;; ui/ux global settings
 (when (eq system-type 'gnu/linux)
@@ -63,6 +63,7 @@
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
 (setq read-process-output-max (* 1024 1024 12))
+(setq gc-cons-threshold 100000000)
 (setq custom-file (make-temp-file ""))
 (setq split-width-threshold 9999)
 (setq split-height-threshold nil)
@@ -99,13 +100,12 @@
   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
   (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file ".."))))
 
-;; gc
-(use-package gcmh
-  :config
-  (gcmh-mode +1))
 
-;; search
-(setq completion-styles '(basic substring partial-completion flex))
+(use-package orderless
+  :init
+  (setq completion-styles '(substring orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package vertico
   :init
@@ -155,21 +155,17 @@
   :config
   (evil-collection-init))
 
-(use-package company
-  :config
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0)
-  (global-company-mode))
+(use-package corfu
+  :init
+  (setq corfu-cycle t
+        corfu-auto t)
+  :init
+  (global-corfu-mode))
+
 
 (use-package projectile
-  :straight (projectile :type git
-                        :host github
-                        :repo "bbatsov/projectile"
-                        :fork (:host github
-                               :repo "mpajkowski/projectile"
-                               :branch "fix/1777"))
   :init
-  (setq projectile-completion-system 'default)
+  (setq projectile-completion-system 'auto)
   :config
   (projectile-global-mode))
 
@@ -226,7 +222,7 @@
   (setq-default eglot-workspace-configuration
                 '(:rust-analyzer (:checkOnSave (:enable t
                                                 :command "clippy"
-                                                :extraArgs ["--target-dir" "/tmp/rust-analyzer-check"])
+                                                :extraArgs ["--target-dir" "/tmp/rust-analyzer-check -- -D warnings"])
                                   :cargo (:features "all")))))
 
 (use-package eldoc-box)

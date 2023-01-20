@@ -1,4 +1,4 @@
-. /etc/profile.d/vte*.sh
+. /etc/profile.d/vte*.sh || true
 
 autoload -Uz compinit && compinit
 
