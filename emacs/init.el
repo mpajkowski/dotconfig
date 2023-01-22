@@ -63,7 +63,7 @@
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
 (setq read-process-output-max (* 1024 1024 12))
-(setq gc-cons-threshold 100000000)
+(setq gc-cons-threshold #x40000000)
 (setq custom-file (make-temp-file ""))
 (setq split-width-threshold 9999)
 (setq split-height-threshold nil)
@@ -222,7 +222,7 @@
   (setq-default eglot-workspace-configuration
                 '(:rust-analyzer (:checkOnSave (:enable t
                                                 :command "clippy"
-                                                :extraArgs ["--target-dir" "/tmp/rust-analyzer-check -- -D warnings"])
+                                                :extraArgs ["--target-dir" "/tmp/rust-analyzer-check" "--" "-D" "warnings"])
                                   :cargo (:features "all")))))
 
 (use-package eldoc-box)
