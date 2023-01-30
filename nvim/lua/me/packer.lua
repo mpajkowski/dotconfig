@@ -5,7 +5,7 @@ return require('packer').startup(function(use)
 
     use {
         'nvim-telescope/telescope.nvim', tag = '0.1.0',
-        requires = { { 'nvim-lua/plenary.nvim' } }
+        requires = { { 'nvim-lua/plenary.nvim' }, { "BurntSushi/ripgrep" } }
     }
 
     use({ 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' })
@@ -13,12 +13,7 @@ return require('packer').startup(function(use)
     use('kristijanhusak/vim-hybrid-material')
     use('preservim/nerdtree')
     use('ojroques/nvim-bufdel')
-
-    use {
-        'vim-airline/vim-airline',
-        requires = { { 'vim-airline/vim-airline-themes' } }
-    }
-
+    use('nvim-lualine/lualine.nvim')
 
     use {
         'VonHeikemen/lsp-zero.nvim',
