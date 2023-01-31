@@ -11,9 +11,11 @@ return require('packer').startup(function(use)
     use({ 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' })
     use('tpope/vim-fugitive')
     use('kristijanhusak/vim-hybrid-material')
-    use('preservim/nerdtree')
     use('ojroques/nvim-bufdel')
     use('nvim-lualine/lualine.nvim')
+    use("nvim-telescope/telescope-file-browser.nvim")
+    use('ahmedkhalf/project.nvim')
+    use("nvim-tree/nvim-web-devicons")
 
     use {
         'VonHeikemen/lsp-zero.nvim',
