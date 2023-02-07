@@ -12,6 +12,9 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(setq warning-minimum-level 'error)
+
+
 ;; mac
 (when (eq system-type 'darwin)
   (customize-set-variable 'native-comp-driver-options '("-Wl,-w"))
