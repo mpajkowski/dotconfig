@@ -14,7 +14,6 @@
 
 (setq warning-minimum-level 'error)
 
-
 ;; mac
 (when (eq system-type 'darwin)
   (customize-set-variable 'native-comp-driver-options '("-Wl,-w"))
@@ -46,8 +45,8 @@
 ;; font
 (when (display-graphic-p)
     (if (eq system-type 'darwin)
-    (set-face-attribute 'default nil :weight 'light :font "Monaco" :height 140)
-    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 110 )))
+    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 150)
+    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 110)))
 
 ;; ui/ux global settings
 (when (eq system-type 'gnu/linux)
@@ -170,6 +169,39 @@
   :init
   (setq projectile-completion-system 'auto)
   :config
+  (defun projectile-ripgrep (search-term &optional arg)
+    "Run a ripgrep (rg) search with `SEARCH-TERM' at current project root.
+
+With an optional prefix argument ARG SEARCH-TERM is interpreted as a
+regular expression.
+
+This command depends on of the Emacs packages ripgrep or rg being
+installed to work."
+    (interactive
+     (list (projectile--read-search-string-with-default
+            (format "Ripgrep %ssearch for" (if current-prefix-arg "regexp " "")))
+           current-prefix-arg))
+    (let ((args (mapcar (lambda (val) (concat "--glob !" (shell-quote-argument val)))
+                        (append projectile-globally-ignored-files
+                                projectile-globally-ignored-directories))))
+      ;; we rely on the external packages ripgrep and rg for the actual search
+      ;;
+      ;; first we check if we can load ripgrep
+      (cond ((require 'ripgrep nil 'noerror)
+             (ripgrep-regexp search-term
+                             (projectile-acquire-root)
+                             (if arg
+                                 args
+                               (cons "--fixed-strings --hidden" args))))
+            ;; and then we try rg
+            ((require 'rg nil 'noerror)
+             (rg-run search-term
+                     "*"                       ;; all files
+                     (projectile-acquire-root)
+                     (not arg)                 ;; literal search?
+                     nil                       ;; no need to confirm
+                     args))
+            (t (error "Packages `ripgrep' and `rg' are not available")))))
   (projectile-global-mode))
 
 (use-package perspective
@@ -350,7 +382,7 @@
 (evil-define-key 'normal 'global (kbd "zs") 'save-buffer)
 
 (evil-define-key '(normal motion) 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
-(evil-define-key '(normal motion) 'global (kbd "<leader>ff") 'projectile-find-file)
+(evil-define-key '(normal motion) 'global (kbd "<leader>pf") 'projectile-find-file)
 (evil-define-key '(normal motion) 'global (kbd "<leader>nn") 'treemacs)
 (evil-define-key '(normal motion) 'global (kbd "<leader>tt") 'multi-vterm-project)
 (evil-define-key '(normal motion) 'global (kbd "<leader>h") 'windmove-left)
