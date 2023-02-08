@@ -1,6 +1,7 @@
 local lualine = require("lualine")
+local lsp_status = require("lsp-status")
 
-local current_time = function()
+local function current_time()
     return os.date("%H:%M")
 end
 
@@ -28,7 +29,7 @@ local cfg = {
         lualine_b = { 'branch', 'diff', 'diagnostics' },
         lualine_c = { 'filename', },
         lualine_x = { 'encoding', 'fileformat', 'filetype' },
-        lualine_y = { 'progress' },
+        lualine_y = { lsp_status.status, 'progress' },
         lualine_z = { 'location', current_time }
     },
     inactive_sections = {

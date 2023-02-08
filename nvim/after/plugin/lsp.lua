@@ -1,66 +1,45 @@
-local lsp = require("lsp-zero")
-
-lsp.preset("recommended")
-
-lsp.ensure_installed({
-    'tsserver',
-    'eslint',
-    'sumneko_lua',
-    'rust_analyzer',
-})
-
-lsp.configure('sumneko_lua', {
-    settings = {
-        Lua = {
-            diagnostics = {
-                globals = { 'vim' }
-            }
-        }
-    }
-})
-
-lsp.configure('sumneko_lua', {
-    settings = {
-        Lua = {
-            diagnostics = {
-                globals = { 'vim' }
-            }
-        }
-    }
-})
-
-
-local cmp = require('cmp')
-local cmp_select = { behavior = cmp.SelectBehavior.Select }
-local cmp_mappings = lsp.defaults.cmp_mappings({
-        ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-        ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-        ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+local cmp = require("cmp")
+cmp.setup({
+    snippet = {
+        expand = function(args)
+            vim.fn["vsnip#anonymous"](args.body)
+        end,
+    },
+    mapping = {
+        ["<C-p>"] = cmp.mapping.select_prev_item(),
+        ["<C-n>"] = cmp.mapping.select_next_item(),
+        -- Add tab support
+        ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+        ["<Tab>"] = cmp.mapping.select_next_item(),
+        ["<C-d>"] = cmp.mapping.scroll_docs( -4),
+        ["<C-f>"] = cmp.mapping.scroll_docs(4),
         ["<C-Space>"] = cmp.mapping.complete(),
-    })
-
-lsp.setup_nvim_cmp({
-    mapping = cmp_mappings
+        ["<C-e>"] = cmp.mapping.close(),
+        ["<CR>"] = cmp.mapping.confirm({
+            behavior = cmp.ConfirmBehavior.Insert,
+            select = true,
+        })
+    },
+    sources = cmp.config.sources({
+        { name = "nvim_lsp" },
+        { name = "vsnip" },
+        { name = "path" },
+        { name = "buffer" },
+    }),
+    experimental = {
+        ghost_text = true,
+    },
 })
 
-lsp.set_preferences({
-    suggest_lsp_servers = false,
-    sign_icons = {
-        error = 'E',
-        warn = 'W',
-        hint = 'H',
-        info = 'I'
-    }
-})
+local lsp_status = require("lsp-status")
+lsp_status.config({ status_symbol = "*" })
+lsp_status.register_progress()
 
-lsp.on_attach(function(client, bufnr)
+local lspconfig = require("lspconfig")
+
+local function on_attach(client, bufnr)
     local telescope = require("telescope.builtin")
     local opts = { buffer = bufnr, remap = false }
-
-    if client.name == "eslint" then
-        vim.cmd.LspStop('eslint')
-        return
-    end
 
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
     vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
@@ -72,12 +51,32 @@ lsp.on_attach(function(client, bufnr)
     vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
     vim.keymap.set("n", "<leader>mv", vim.lsp.buf.rename, opts)
     vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
-end)
 
-vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.formatting_sync()]]
+    vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.formatting_sync()]]
+    lsp_status.on_attach(client, bufnr)
+end
 
-lsp.setup()
+lspconfig.rust_analyzer.setup({
+    on_attach = on_attach,
+    handlers = lsp_status.handlers,
+    settings = {
+        ["rust-analyzer"] = {
+            check = {
+                allTargets = false
+            },
+            checkOnSave = {
+                enable = true,
+                command = "clippy",
+                extraArgs = { "--target-dir", "/tmp/rust-analyzer-check" }
+            },
+            cargo = {
+                allFeatures = true,
+            }
+        }
+    },
+    capabilities = lsp_status.capabilities
+})
 
 vim.diagnostic.config({
-    virtual_text = false,
+    virtual_text = false
 })

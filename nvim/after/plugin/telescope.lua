@@ -20,15 +20,7 @@ telescope.setup({
             -- disables netrw and use telescope-file-browser in its place
             hijack_netrw = true,
         },
-        project = {
-            hidden_files = true,
-            theme = "dropdown",
-            order_by = "asc",
-            search_by = "title",
-            sync_with_nvim_tree = true,
-        }
     },
-
 })
 
 telescope.load_extension("file_browser")
