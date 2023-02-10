@@ -28,5 +28,4 @@ return require("packer").startup(function(use)
             after = { "hrsh7th/nvim-cmp" },
             requires = { "hrsh7th/nvim-cmp" },
         })
-        use("nvim-lua/lsp-status.nvim")
     end)

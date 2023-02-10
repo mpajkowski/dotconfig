@@ -31,9 +31,7 @@ cmp.setup({
     },
 })
 
-local lsp_status = require("lsp-status")
-lsp_status.config({ status_symbol = "*" })
-lsp_status.register_progress()
+require("fidget").setup({})
 
 local lspconfig = require("lspconfig")
 
@@ -53,12 +51,10 @@ local function on_attach(client, bufnr)
     vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
 
     vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.formatting_sync()]]
-    lsp_status.on_attach(client, bufnr)
 end
 
 lspconfig.rust_analyzer.setup({
     on_attach = on_attach,
-    handlers = lsp_status.handlers,
     settings = {
         ["rust-analyzer"] = {
             check = {
@@ -74,7 +70,6 @@ lspconfig.rust_analyzer.setup({
             }
         }
     },
-    capabilities = lsp_status.capabilities
 })
 
 vim.diagnostic.config({
