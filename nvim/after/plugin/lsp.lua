@@ -2,16 +2,13 @@ local cmp = require("cmp")
 cmp.setup({
     snippet = {
         expand = function(args)
-            vim.fn["vsnip#anonymous"](args.body)
-        end,
+            require("luasnip").lsp_expand(args.body)
+        end
     },
     mapping = {
         ["<C-p>"] = cmp.mapping.select_prev_item(),
         ["<C-n>"] = cmp.mapping.select_next_item(),
-        -- Add tab support
-        ["<S-Tab>"] = cmp.mapping.select_prev_item(),
-        ["<Tab>"] = cmp.mapping.select_next_item(),
-        ["<C-d>"] = cmp.mapping.scroll_docs( -4),
+        ["<C-d>"] = cmp.mapping.scroll_docs(-4),
         ["<C-f>"] = cmp.mapping.scroll_docs(4),
         ["<C-Space>"] = cmp.mapping.complete(),
         ["<C-e>"] = cmp.mapping.close(),
@@ -26,9 +23,6 @@ cmp.setup({
         { name = "path" },
         { name = "buffer" },
     }),
-    experimental = {
-        ghost_text = true,
-    },
 })
 
 require("fidget").setup({})
@@ -53,7 +47,10 @@ local function on_attach(client, bufnr)
     vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.formatting_sync()]]
 end
 
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
 lspconfig.rust_analyzer.setup({
+    capabilities = capabilities,
     on_attach = on_attach,
     settings = {
         ["rust-analyzer"] = {
