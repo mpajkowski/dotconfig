@@ -11,6 +11,7 @@ vim.keymap.set("n", "<leader>rg", builtin.live_grep, {})
 vim.keymap.set("n", "<leader>pb", builtin.buffers, {})
 
 telescope.setup({
+    wrap_results = true,
     color_devicons = false,
     extensions = {
         file_browser = {
