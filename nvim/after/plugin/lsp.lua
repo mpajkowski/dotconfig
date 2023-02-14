@@ -30,7 +30,6 @@ require("fidget").setup({})
 local lspconfig = require("lspconfig")
 
 local function on_attach(client, bufnr)
-    local telescope = require("telescope.builtin")
     local opts = { buffer = bufnr, remap = false }
 
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
