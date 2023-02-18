@@ -3,7 +3,7 @@ local builtin = require("telescope.builtin")
 
 local find_files = function()
     return builtin.find_files({ hidden = true,
-        file_ignore_patterns = { 'node_modules', '.git' } })
+        file_ignore_patterns = { 'node_modules', '.git', 'target' } })
 end
 
 vim.keymap.set("n", "<leader>pf", find_files, {})

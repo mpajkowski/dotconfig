@@ -1,17 +1,10 @@
-;; initialize straight
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
 
+(require 'use-package)
+
+(setq use-package-always-ensure t)
 (setq warning-minimum-level 'error)
 
 ;; mac
@@ -19,9 +12,6 @@
   (customize-set-variable 'native-comp-driver-options '("-Wl,-w"))
   (setq mac-option-modifier 'alt)
   (setq mac-command-modifier 'meta))
-
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default +1)
 
 ;; utf8
 (set-charset-priority 'unicode)
@@ -95,7 +85,7 @@
       `((".*" "~/.emacs-saves/" t)))
 
 (use-package dired
-  :straight (:type built-in)
+  :ensure nil
   :config
   (setq dired-kill-when-opening-new-dired-buffer t)
   (put 'dired-find-alternate-file 'disabled nil)
@@ -114,12 +104,11 @@
   (vertico-mode +1))
 
 (use-package savehist
-  :straight (:type built-in)
   :init
   (savehist-mode))
 
 (use-package uniquify
-  :straight (:type built-in)
+  :ensure nil
   :config
   (setq uniquify-separator "/"
         uniquify-buffer-name-style 'forward))
@@ -244,12 +233,12 @@ installed to work."
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
 (use-package treesit
-  :straight (:type built-in)
+  :ensure nil
   :init
   (setq treesit-extra-load-path '("/usr/local/lib" "~/.config/treesit")))
 
 (use-package eglot
-  :straight (:type built-in)
+  :ensure nil
   :hook
   (eglot-managed-mode . (lambda () (eldoc-mode -1)))
   :config
@@ -363,13 +352,13 @@ installed to work."
   (zig-mode . eglot-ensure))
 
 (use-package c++-mode
-  :straight (:type built-in)
+  :ensure nil
   :defer t
   :hook
   (c++-mode . eglot-ensure))
 
 (use-package c-mode
-  :straight (:type built-in)
+  :ensure nil
   :defer t
   :hook
   (c-mode . eglot-ensure))
