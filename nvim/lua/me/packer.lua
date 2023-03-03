@@ -19,6 +19,7 @@ return require("packer").startup(function(use)
         use("neovim/nvim-lspconfig")
         use("j-hui/fidget.nvim")
         use("folke/trouble.nvim")
+        use("diepm/vim-rest-console")
 
         use("hrsh7th/nvim-cmp")
         use({

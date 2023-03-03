@@ -54,7 +54,7 @@ lspconfig.rust_analyzer.setup({
     settings = {
         ["rust-analyzer"] = {
             check = {
-                allTargets = false
+                allTargets = true
             },
             checkOnSave = {
                 enable = true,

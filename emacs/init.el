@@ -253,10 +253,16 @@ installed to work."
 
 (fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point)
 
-(defun flymake-clear-diagnostics ()
+(use-package flymake
+  :ensure nil
+  :config
+  (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
+  (evil-define-key 'normal flymake-project-diagnostics-mode-map (kbd "q") 'kill-buffer-and-window)
+  (evil-define-key 'normal flymake-project-diagnostics-mode-map (kbd "ZZ") 'kill-buffer-and-window)
+  (defun flymake-clear-diagnostics ()
   "Removes diagnostics list"
   (interactive)
-  (setq flymake-list-only-diagnostics '()))
+  (setq flymake-list-only-diagnostics '())))
 
 (use-package yasnippet
   :config
