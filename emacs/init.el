@@ -47,6 +47,7 @@
 	(expand-file-name "config/" user-emacs-directory))
    (setq no-littering-var-directory
 	(expand-file-name "data/" user-emacs-directory))
+   (make-directory (no-littering-expand-var-file-name "auto-save/") t)
    (setq auto-save-file-name-transforms
 	`((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
@@ -75,10 +76,7 @@
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq posframe-gtk-resize-child-frames 'resize-mode)
 (setq read-process-output-max (* 1024 1024 12))
-(setq gc-cons-threshold #x40000000)
 (setq custom-file (make-temp-file ""))
-(setq split-width-threshold 9999)
-(setq split-height-threshold nil)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq ring-bell-function 'ignore)
 (setq-default indent-tabs-mode nil)
@@ -86,10 +84,16 @@
 (setq create-lockfiles nil)
 (setq auto-revert-verbose nil)
 (setq column-number-mode t)
+(setq split-width-threshold 9999)
+(setq split-height-threshold nil)
 
 (global-hl-line-mode)
 
 (modify-syntax-entry ?_ "w")
+
+(use-package gcmh
+  :config
+  (gcmh-mode +1))
 
 (use-package general
   :config
@@ -164,8 +168,6 @@
   (setq consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS")
   (setq consult-narrow-key "<"))
 
-
-
 (use-package savehist
   :init
   (savehist-mode))
@@ -176,40 +178,44 @@
   (setq uniquify-separator "/"
         uniquify-buffer-name-style 'forward))
 
+(use-package which-key
+  :init
+  (which-key-mode))
+
 (use-package tabspaces
-  ;; use this next line only if you also use straight, otherwise ignore it.
   :straight (:type git :host github :repo "mclear-tools/tabspaces")
-  :hook
-  (after-init . tabspaces-mode)
   :commands (tabspaces-switch-or-create-workspace
              tabspaces-open-or-create-project-and-workspace)
+  :init
+  (tabspaces-mode +1)
   :config
   (setq tabspaces-use-filtered-buffers-as-default t
         tabspaces-default-tab "Default"
         tabspaces-remove-to-default t
-        tabspaces-include-buffers '("*scratch*"))
-
-  ; set consult-workspace buffer list
+        tabspaces-include-buffers '("*scratch*")
+        tab-bar-new-tab-choice "*scratch*"
+        tab-bar-new-tab-to "rightmost")
   (with-eval-after-load 'consult
     (consult-customize consult--source-buffer :hidden t :default nil)
+    ;; set consult-workspace buffer list
     (defvar consult--source-workspace
-      (list :name     "Workspace Buffers"
-            :narrow   ?w
-            :history  'buffer-name-history
-            :category 'buffer
-            :state    #'consult--buffer-state
-            :default  t
-            :items    (lambda () (consult--buffer-query
-                                  :predicate #'tabspaces--local-buffer-p
-                                  :sort 'visibility
-                                  :as #'buffer-name)))
-
-      "Set workspace buffer list for consult-buffer.")
-    (add-to-list 'consult-buffer-sources 'consult--source-workspace)))
-
-(use-package which-key
-  :init
-  (which-key-mode))
+    (list :name     "Workspace Buffers"
+          :narrow   ?w
+          :history  'buffer-name-history
+          :category 'buffer
+          :state    #'consult--buffer-state
+          :default  t
+          :items    (lambda () (consult--buffer-query
+                          :predicate #'tabspaces--local-buffer-p
+                          :sort 'visibility
+                          :as #'buffer-name)))
+    "Set workspace buffer list for consult-buffer.")
+    (add-to-list 'consult-buffer-sources 'consult--source-workspace))
+  (defun me/tabspaces-switch-project ()
+    (interactive)
+     (call-interactively 'tabspaces-open-or-create-project-and-workspace)
+     (let ((scratch (get-buffer "*scratch*")))
+       (tabspaces-remove-selected-buffer scratch))))
 
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
@@ -285,7 +291,7 @@
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
   (general-def 'normal flymake-project-diagnostics-mode-map "ZZ" 'kill-buffer-and-window)
-  (defun flymake-clear-diagnostics ()
+  (defun me/flymake-clear-diagnostics ()
     "Removes diagnostics list"
     (interactive)
     (setq flymake-list-only-diagnostics '())))
@@ -358,7 +364,7 @@
 ;; bindings
 (general-def 'normal 'global "zs" 'save-buffer)
 
-(mleader-def '(normal motion emacs) 'global "pp" 'tabspaces-open-or-create-project-and-workspace)
+(mleader-def '(normal motion emacs) 'global "pp" 'me/tabspaces-switch-project)
 (mleader-def '(normal motion emacs) 'global "pf" 'project-find-file)
 (mleader-def '(normal motion emacs) 'global "b" 'consult-buffer)
 (mleader-def '(normal motion emacs) 'global "nn" 'treemacs)
@@ -373,4 +379,4 @@
 (general-def 'normal 'global "ga" 'eglot-code-actions)
 (mleader-def 'normal 'global "mv" 'eglot-rename)
 (general-def 'normal 'global "K" 'eldoc-doc-buffer)
-(mleader-def '(normal motion emacs) 'global "cl" 'flymake-clear-diagnostics)
+(mleader-def '(normal motion emacs) 'global "cl" 'me/flymake-clear-diagnostics)
