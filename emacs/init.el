@@ -41,6 +41,15 @@
   :init
   (exec-path-from-shell-initialize))
 
+(use-package no-littering
+  :config
+   (setq no-littering-etc-directory
+	(expand-file-name "config/" user-emacs-directory))
+   (setq no-littering-var-directory
+	(expand-file-name "data/" user-emacs-directory))
+   (setq auto-save-file-name-transforms
+	`((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+
 ;; font
 (when (display-graphic-p)
     (if (eq system-type 'darwin)
@@ -48,6 +57,7 @@
     (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 110)))
 
 ;; global settings
+(display-battery-mode +1)
 (setq warning-minimum-level 'error)
 (when (eq system-type 'gnu/linux)
   (menu-bar-mode -1))
@@ -73,26 +83,13 @@
 (setq ring-bell-function 'ignore)
 (setq-default indent-tabs-mode nil)
 (setq enable-recursive-minibuffers t)
-(setq make-backup-files nil)
-(setq delete-auto-save-files t)
-(setq global-auto-revert-non-file-buffers t)
-(global-auto-revert-mode t)
+(setq create-lockfiles nil)
 (setq auto-revert-verbose nil)
 (setq column-number-mode t)
 
 (global-hl-line-mode)
 
 (modify-syntax-entry ?_ "w")
-
-;; autosave
-(setq backup-by-copying t
-      backup-directory-alist '(("." . "~/.emacs-saves"))
-      delete-old-versions t
-      kept-new-versions 6
-      kept-old-versions 2
-      version-control t)
-(setq auto-save-file-name-transforms
-      `((".*" "~/.emacs-saves/" t)))
 
 (use-package general
   :config
@@ -242,25 +239,14 @@
   :config
   (evil-collection-init))
 
-(use-package corfu
-  :init
-  (setq corfu-cycle t
-        corfu-auto t)
-  :init
-  (global-corfu-mode))
-
-(use-package treemacs
+(use-package company
   :config
-  (treemacs-follow-mode t)
-  (treemacs-filewatch-mode t))
-
-(use-package treemacs-evil
-  :after (treemacs evil))
+  (global-company-mode +1))
 
 (use-package all-the-icons)
 
 (use-package doom-themes
-  :after (treemacs all-the-icons)
+  :after (all-the-icons)
   :config
   (setq doom-themes-enable-bold nil
         doom-theme-enable-italic nil)
@@ -300,9 +286,9 @@
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
   (general-def 'normal flymake-project-diagnostics-mode-map "ZZ" 'kill-buffer-and-window)
   (defun flymake-clear-diagnostics ()
-  "Removes diagnostics list"
-  (interactive)
-  (setq flymake-list-only-diagnostics '())))
+    "Removes diagnostics list"
+    (interactive)
+    (setq flymake-list-only-diagnostics '())))
 
 (use-package yasnippet
   :config
