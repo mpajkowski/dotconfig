@@ -125,7 +125,7 @@
   :init
   (vertico-mode +1))
 
-(if window-system 
+(if window-system
     (use-package vertico-posframe
     :config
     (vertico-posframe-mode +1)))
@@ -160,6 +160,10 @@
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
   :config
+  (setq consult-project-root-function
+        (lambda ()
+          (when-let (project (project-current))
+            (car (project-roots project)))))
   (setq consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS")
   (setq consult-narrow-key "<"))
 
@@ -176,7 +180,7 @@
         uniquify-buffer-name-style 'forward))
 
 (use-package tabspaces
-  ;; use this next line only if you also use straight, otherwise ignore it. 
+  ;; use this next line only if you also use straight, otherwise ignore it.
   :straight (:type git :host github :repo "mclear-tools/tabspaces")
   :hook
   (after-init . tabspaces-mode)
@@ -205,7 +209,7 @@
 
       "Set workspace buffer list for consult-buffer.")
     (add-to-list 'consult-buffer-sources 'consult--source-workspace)))
-  
+
 (use-package which-key
   :init
   (which-key-mode))
@@ -378,7 +382,7 @@
 (mleader-def '(normal motion emacs) 'global "k" 'windmove-up)
 (mleader-def '(normal motion emacs) 'global "l" 'windmove-right)
 
-(mleader-def '(normal motion emacs) 'global "dg" 'consult-flymake)
+(mleader-def '(normal motion emacs) 'global "dg" 'flymake-show-project-diagnostics)
 (mleader-def '(normal motion emacs) 'global "rg" 'consult-ripgrep)
 (general-def 'normal 'global "ga" 'eglot-code-actions)
 (mleader-def 'normal 'global "mv" 'eglot-rename)
