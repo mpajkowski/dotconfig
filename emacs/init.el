@@ -1,11 +1,20 @@
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-(package-initialize)
+(setq straight-repository-branch "develop")
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-(require 'use-package)
-
+(straight-use-package 'use-package)
 (setq use-package-always-ensure t)
-(setq warning-minimum-level 'error)
+(setq straight-use-package-by-default t)
 
 ;; mac
 (when (eq system-type 'darwin)
@@ -38,7 +47,8 @@
     (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 150)
     (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 110)))
 
-;; ui/ux global settings
+;; global settings
+(setq warning-minimum-level 'error)
 (when (eq system-type 'gnu/linux)
   (menu-bar-mode -1))
 (add-hook 'window-setup-hook 'toggle-frame-maximized t)
@@ -84,14 +94,13 @@
 (setq auto-save-file-name-transforms
       `((".*" "~/.emacs-saves/" t)))
 
-(use-package dired
-  :ensure nil
+(use-package general
   :config
-  (setq dired-kill-when-opening-new-dired-buffer t)
-  (put 'dired-find-alternate-file 'disabled nil)
-  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
-  (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file ".."))))
-
+  (general-auto-unbind-keys)
+  (general-create-definer mleader-def
+    :states '(normal motion emacs)
+    :prefix "SPC"
+    :non-normal-prefix "M-SPC"))
 
 (use-package orderless
   :init
@@ -100,21 +109,103 @@
         completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package vertico
+  :straight (vertico :files (:defaults "extensions/*")
+                     :includes (vertico-indexed
+                                vertico-flat
+                                vertico-grid
+                                vertico-mouse
+                                ;; vertico-quick
+                                vertico-buffer
+                                vertico-repeat
+                                vertico-reverse
+                                vertico-directory
+                                vertico-multiform
+                                vertico-unobtrusive
+                                ))
   :init
   (vertico-mode +1))
+
+(if window-system 
+    (use-package vertico-posframe
+    :config
+    (vertico-posframe-mode +1)))
+
+(use-package consult
+  :bind (
+         ("C-c M-x" . consult-mode-command)
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+  :config
+  (setq consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS")
+  (setq consult-narrow-key "<"))
+
+
 
 (use-package savehist
   :init
   (savehist-mode))
 
 (use-package uniquify
-  :ensure nil
+  :straight (:type built-in)
   :config
   (setq uniquify-separator "/"
         uniquify-buffer-name-style 'forward))
 
-(use-package rg)
+(use-package tabspaces
+  ;; use this next line only if you also use straight, otherwise ignore it. 
+  :straight (:type git :host github :repo "mclear-tools/tabspaces")
+  :hook
+  (after-init . tabspaces-mode)
+  :commands (tabspaces-switch-or-create-workspace
+             tabspaces-open-or-create-project-and-workspace)
+  :config
+  (setq tabspaces-use-filtered-buffers-as-default t
+        tabspaces-default-tab "Default"
+        tabspaces-remove-to-default t
+        tabspaces-include-buffers '("*scratch*"))
 
+  ; set consult-workspace buffer list
+  (with-eval-after-load 'consult
+    (consult-customize consult--source-buffer :hidden t :default nil)
+    (defvar consult--source-workspace
+      (list :name     "Workspace Buffers"
+            :narrow   ?w
+            :history  'buffer-name-history
+            :category 'buffer
+            :state    #'consult--buffer-state
+            :default  t
+            :items    (lambda () (consult--buffer-query
+                                  :predicate #'tabspaces--local-buffer-p
+                                  :sort 'visibility
+                                  :as #'buffer-name)))
+
+      "Set workspace buffer list for consult-buffer.")
+    (add-to-list 'consult-buffer-sources 'consult--source-workspace)))
+  
 (use-package which-key
   :init
   (which-key-mode))
@@ -127,19 +218,20 @@
         doom-modeline-icon                    t
         doom-modeline-buffer-file-name-style  'truncate-with-project))
 
+
 (use-package evil
   :init
-  (setq evil-want-keybinding nil)
-  (setq evil-want-integration t)
-  (setq evil-undo-system 'undo-redo)
+  (setq evil-want-keybinding nil
+        evil-want-integration t
+        evil-undo-system 'undo-redo)
   :config
   (evil-mode +1))
 
 (use-package evil-numbers
   :after (evil)
   :config
-  (evil-define-key '(normal visual) 'global (kbd "C-c =") 'evil-numbers/inc-at-pt)
-  (evil-define-key '(normal visual) 'global (kbd "C-c -") 'evil-numbers/dec-at-pt))
+  (general-def '(normal visual) "C-c =" 'evil-numbers/inc-at-pt)
+  (general-def '(normal visual) "C-c -" 'evil-numbers/dec-at-pt))
 
 (use-package evil-collection
   :after (evil)
@@ -153,54 +245,6 @@
   :init
   (global-corfu-mode))
 
-
-(use-package projectile
-  :init
-  (setq projectile-completion-system 'auto)
-  :config
-  (defun projectile-ripgrep (search-term &optional arg)
-    "Run a ripgrep (rg) search with `SEARCH-TERM' at current project root.
-
-With an optional prefix argument ARG SEARCH-TERM is interpreted as a
-regular expression.
-
-This command depends on of the Emacs packages ripgrep or rg being
-installed to work."
-    (interactive
-     (list (projectile--read-search-string-with-default
-            (format "Ripgrep %ssearch for" (if current-prefix-arg "regexp " "")))
-           current-prefix-arg))
-    (let ((args (mapcar (lambda (val) (concat "--glob !" (shell-quote-argument val)))
-                        (append projectile-globally-ignored-files
-                                projectile-globally-ignored-directories))))
-      ;; we rely on the external packages ripgrep and rg for the actual search
-      ;;
-      ;; first we check if we can load ripgrep
-      (cond ((require 'ripgrep nil 'noerror)
-             (ripgrep-regexp search-term
-                             (projectile-acquire-root)
-                             (if arg
-                                 args
-                               (cons "--fixed-strings --hidden" args))))
-            ;; and then we try rg
-            ((require 'rg nil 'noerror)
-             (rg-run search-term
-                     "*"                       ;; all files
-                     (projectile-acquire-root)
-                     (not arg)                 ;; literal search?
-                     nil                       ;; no need to confirm
-                     args))
-            (t (error "Packages `ripgrep' and `rg' are not available")))))
-  (projectile-global-mode))
-
-(use-package perspective
-  :init
-  (setq persp-mode-prefix-key (kbd "C-c M-p"))
-  (persp-mode))
-
-(use-package persp-projectile
-  :after (perspective))
-
 (use-package treemacs
   :config
   (treemacs-follow-mode t)
@@ -208,14 +252,6 @@ installed to work."
 
 (use-package treemacs-evil
   :after (treemacs evil))
-
-(use-package treemacs-projectile
-  :after (treemacs projectile))
-
-(use-package treemacs-perspective
-  :after (treemacs perspective)
-  :config
-  (treemacs-set-scope-type 'Perspectives))
 
 (use-package all-the-icons)
 
@@ -233,14 +269,14 @@ installed to work."
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
 (use-package treesit
-  :ensure nil
+  :straight (:type built-in)
   :init
   (setq treesit-extra-load-path '("/usr/local/lib" "~/.config/treesit")))
 
 (use-package eglot
-  :ensure nil
+  :straight (:type built-in)
   :hook
-  (eglot-managed-mode . (lambda () (eldoc-mode -1)))
+  (eglot-managed-mode . (lambda () (eldoc-mode -1) (eglot-inlay-hints-mode -1)))
   :config
   (setq eglot-stay-out-of '(eldoc))
   (setq-default eglot-workspace-configuration
@@ -254,11 +290,11 @@ installed to work."
 (fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point)
 
 (use-package flymake
-  :ensure nil
+  :straight (:type built-in)
   :config
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
-  (evil-define-key 'normal flymake-project-diagnostics-mode-map (kbd "q") 'kill-buffer-and-window)
-  (evil-define-key 'normal flymake-project-diagnostics-mode-map (kbd "ZZ") 'kill-buffer-and-window)
+  (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
+  (general-def 'normal flymake-project-diagnostics-mode-map "ZZ" 'kill-buffer-and-window)
   (defun flymake-clear-diagnostics ()
   "Removes diagnostics list"
   (interactive)
@@ -273,40 +309,10 @@ installed to work."
 (use-package vterm
   :defer t
   :config
-  (add-hook 'vterm-mode-hook 'evil-emacs-state))
+  (setq vterm-kill-buffer-on-exit t))
 
 (use-package multi-vterm
-  :defer t
-  :config
-  (add-hook 'vterm-mode-hook
-                  (lambda ()
-                  (setq-local evil-insert-state-cursor 'box)
-                  (evil-insert-state)))
-  (define-key vterm-mode-map [return]                      #'vterm-send-return)
-
-  (setq vterm-keymap-exceptions nil)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-e")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-f")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-a")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-v")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-b")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-w")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-u")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-n")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-m")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-p")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-j")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-k")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-r")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-t")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-g")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-c")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-SPC")    #'vterm--self-insert)
-  (evil-define-key 'normal vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
-  (evil-define-key 'normal vterm-mode-map (kbd "i")        #'evil-insert-resume)
-  (evil-define-key 'normal vterm-mode-map (kbd "o")        #'evil-insert-resume)
-  (evil-define-key 'normal vterm-mode-map (kbd "<return>") #'evil-insert-resume))
+  :defer t)
 
 (use-package restclient
   :defer t)
@@ -327,19 +333,6 @@ installed to work."
 (use-package magit
   :defer t)
 
-(use-package osm
-  :defer t
-  :bind (("C-c m h" . osm-home)
-         ("C-c m s" . osm-search)
-         ("C-c m v" . osm-server)
-         ("C-c m t" . osm-goto)
-         ("C-c m x" . osm-gpx-show)
-         ("C-c m j" . osm-bookmark-jump))
-
-  :config
-  (setq osm-server 'default)
-  (setq osm-copyright nil))
-
 (use-package scala-mode
   :defer t)
 
@@ -358,13 +351,13 @@ installed to work."
   (zig-mode . eglot-ensure))
 
 (use-package c++-mode
-  :ensure nil
+  :straight (:type built-in)
   :defer t
   :hook
   (c++-mode . eglot-ensure))
 
 (use-package c-mode
-  :ensure nil
+  :straight (:type built-in)
   :defer t
   :hook
   (c-mode . eglot-ensure))
@@ -373,28 +366,21 @@ installed to work."
   :defer t)
 
 ;; bindings
-(evil-set-leader (list 'normal 'motion) (kbd "SPC"))
-(evil-define-key 'normal 'global (kbd "zs") 'save-buffer)
+(general-def 'normal 'global "zs" 'save-buffer)
 
-(evil-define-key '(normal motion) 'global (kbd "<leader>pp") 'projectile-persp-switch-project)
-(evil-define-key '(normal motion) 'global (kbd "<leader>pf") 'projectile-find-file)
-(evil-define-key '(normal motion) 'global (kbd "<leader>nn") 'treemacs)
-(evil-define-key '(normal motion) 'global (kbd "<leader>tt") 'multi-vterm-project)
-(evil-define-key '(normal motion) 'global (kbd "<leader>h") 'windmove-left)
-(evil-define-key '(normal motion) 'global (kbd "<leader>j") 'windmove-down)
-(evil-define-key '(normal motion) 'global (kbd "<leader>k") 'windmove-up)
-(evil-define-key '(normal motion) 'global (kbd "<leader>l") 'windmove-right)
+(mleader-def '(normal motion emacs) 'global "pp" 'tabspaces-open-or-create-project-and-workspace)
+(mleader-def '(normal motion emacs) 'global "pf" 'project-find-file)
+(mleader-def '(normal motion emacs) 'global "b" 'consult-buffer)
+(mleader-def '(normal motion emacs) 'global "nn" 'treemacs)
+(mleader-def '(normal motion emacs) 'global "tt" 'multi-vterm-project)
+(mleader-def '(normal motion emacs) 'global "h" 'windmove-left)
+(mleader-def '(normal motion emacs) 'global "j" 'windmove-down)
+(mleader-def '(normal motion emacs) 'global "k" 'windmove-up)
+(mleader-def '(normal motion emacs) 'global "l" 'windmove-right)
 
-(evil-define-key 'normal 'global (kbd "TAB") 'projectile-next-project-buffer)
-(evil-define-key 'normal 'global (kbd "<backtab>") 'projectile-previous-project-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>b") 'persp-switch-to-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>dg") 'flymake-show-project-diagnostics)
-(evil-define-key 'normal 'global (kbd "<leader>rg") 'projectile-ripgrep)
-(evil-define-key 'normal 'global (kbd "ga") 'eglot-code-actions)
-(evil-define-key 'normal 'global (kbd "<leader>mv") 'eglot-rename)
-(evil-define-key 'normal 'global (kbd "K") 'eldoc-doc-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>cl") 'flymake-clear-diagnostics)
-
-(evil-define-key 'normal 'global (kbd "C-n") 'company-select-next)
-(evil-define-key 'normal 'global (kbd "C-p") 'company-select-previous)
-
+(mleader-def '(normal motion emacs) 'global "dg" 'consult-flymake)
+(mleader-def '(normal motion emacs) 'global "rg" 'consult-ripgrep)
+(general-def 'normal 'global "ga" 'eglot-code-actions)
+(mleader-def 'normal 'global "mv" 'eglot-rename)
+(general-def 'normal 'global "K" 'eldoc-doc-buffer)
+(mleader-def '(normal motion emacs) 'global "cl" 'flymake-clear-diagnostics)

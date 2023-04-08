@@ -3,8 +3,13 @@ theme = "onedark"
 [editor]
 line-number = "relative"
 mouse = false
+bufferline = "multiple"
 
 [editor.cursor-shape]
 insert = "bar"
 normal = "block"
 select = "underline"
+
+[keys.normal]
+"tab" = ":bn"
+"S-tab" = ":bp"

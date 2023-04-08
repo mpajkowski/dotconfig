@@ -18,7 +18,6 @@ fish_add_path "/opt/homebrew/bin"
 
 export MOZ_ENABLE_WAYLAND=1
 
-fish_vi_key_bindings
 
 function vterm_printf;
     if begin; [  -n "$TMUX" ]  ; and  string match -q -r "screen|tmux" "$TERM"; end
@@ -37,7 +36,10 @@ if [ "$INSIDE_EMACS" = 'vterm' ]
         vterm_printf "51;Evterm-clear-scrollback";
         tput clear;
     end
+else
+    fish_vi_key_bindings
 end
+
 
 function fish_right_prompt -d "Write out the right prompt"
     kubectl config get-contexts | grep '*' | awk '{ print $2 }'
