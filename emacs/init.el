@@ -32,11 +32,6 @@
 (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 (setq auto-window-vscroll nil)
 
-;; kill term on exit
-(defadvice term-handle-exit
-  (after term-kill-buffer-on-exit activate)
-(kill-buffer))
-
 (use-package exec-path-from-shell
   :init
   (exec-path-from-shell-initialize))
@@ -53,12 +48,12 @@
 
 ;; font
 (when (display-graphic-p)
-    (if (eq system-type 'darwin)
-    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 150)
+  (if (eq system-type 'darwin)
+      ((set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 150)
+       (display-battery-mode +1))
     (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 110)))
 
 ;; global settings
-(display-battery-mode +1)
 (setq warning-minimum-level 'error)
 (when (eq system-type 'gnu/linux)
   (menu-bar-mode -1))
@@ -87,7 +82,13 @@
 (setq split-width-threshold 9999)
 (setq split-height-threshold nil)
 
-(global-hl-line-mode)
+(use-package hl-line
+  :straight (:type built-in)
+  :hook
+  (prog-mode . hl-line-mode)
+  (text-mode . hl-line-mode)
+  :config
+  (setq hl-line-sticky-flag nil))
 
 (modify-syntax-entry ?_ "w")
 
@@ -303,12 +304,13 @@
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
 (use-package vterm
-  :defer t
-  :config
-  (setq vterm-kill-buffer-on-exit t))
+  :defer t)
 
 (use-package multi-vterm
-  :defer t)
+  :defer t
+  :config
+  (setq multi-vterm-dedicated-window-height-percent 30))
+
 
 (use-package restclient
   :defer t)
