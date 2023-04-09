@@ -331,6 +331,11 @@
 (use-package magit
   :defer t)
 
+(use-package magit-delta
+  :defer t
+  :hook
+  (magit-mode . magit-delta-mode))
+
 (use-package scala-mode
   :defer t)
 
