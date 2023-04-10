@@ -49,8 +49,7 @@
 ;; font
 (when (display-graphic-p)
   (if (eq system-type 'darwin)
-      ((set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 150)
-       (display-battery-mode +1))
+    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 150)
     (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 110)))
 
 ;; global settings
@@ -248,6 +247,8 @@
 
 (use-package company
   :config
+  (setq company-idle-delay 0.2
+        company-minimum-prefix-length 1)
   (global-company-mode +1))
 
 (use-package all-the-icons)
@@ -255,11 +256,9 @@
 (use-package doom-themes
   :after (all-the-icons)
   :config
-  (setq doom-themes-enable-bold nil
-        doom-theme-enable-italic nil)
+  (setq doom-themes-enable-bold t
+        doom-theme-enable-italic t)
   (load-theme 'doom-tomorrow-night t)
-  (setq doom-themes-treemacs-theme "doom-colors")
-  (doom-themes-treemacs-config)
   (doom-themes-org-config))
 
 (use-package evil-nerd-commenter
@@ -274,6 +273,7 @@
   :straight (:type built-in)
   :hook
   (eglot-managed-mode . (lambda () (eldoc-mode -1) (eglot-inlay-hints-mode -1)))
+  (before-save . eglot-format-buffer)
   :config
   (setq eglot-stay-out-of '(eldoc))
   (setq-default eglot-workspace-configuration
@@ -316,9 +316,8 @@
   :defer t)
 
 (use-package rustic
-  :defer t
+  :mode ((rx ".rs" string-end) . rustic-mode)
   :hook
-  (before-save . eglot-format-buffer)
   (rustic-mode . eglot-ensure)
   :config
   (setq rustic-lsp-client 'eglot)

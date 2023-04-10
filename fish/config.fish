@@ -20,7 +20,7 @@ export MOZ_ENABLE_WAYLAND=1
 
 if [ "$INSIDE_EMACS" = 'vterm' ]
     function vterm_printf;
-        if begin; [  -n "$TMUX" ]  ; and  string match -q -r "screen|tmux" "$TERM"; end 
+        if begin; [  -n "$TMUX" ]  ; and  string match -q -r "screen|tmux" "$TERM"; end
             # tell tmux to pass the escape sequences through
             printf "\ePtmux;\e\e]%s\007\e\\" "$argv"
         else if string match -q -- "screen*" "$TERM"
@@ -48,6 +48,6 @@ else
 end
 
 
-function fish_right_prompt -d "Write out the right prompt"
-    kubectl config get-contexts | grep '*' | awk '{ print $2 }'
-end
+#function fish_right_prompt -d "Write out the right prompt"
+#    kubectl config get-contexts | grep '*' | awk '{ print $2 }'
+#end
