@@ -315,17 +315,6 @@
 (use-package restclient
   :defer t)
 
-(use-package rustic
-  :mode ((rx ".rs" string-end) . rustic-mode)
-  :hook
-  (rustic-mode . eglot-ensure)
-  :config
-  (setq rustic-lsp-client 'eglot)
-  (setq rustic-default-test-arguments "--benches --tests --all-features -- --nocapture"))
-
-(use-package vimrc-mode
-  :defer t
-  :mode ((rx ".vim" string-end) . vimrc-mode))
 
 (use-package magit
   :defer t)
@@ -335,10 +324,27 @@
   :hook
   (magit-mode . magit-delta-mode))
 
-(use-package scala-mode
+;; languages
+(use-package rust-ts-mode
+  :straight (:type built-in)
+  :defer t
+  :mode ((rx ".rs" string-end) . rust-ts-mode)
+  :hook
+  (rust-ts-mode . eglot-ensure))
+
+(use-package toml-ts-mode
+  :straight (:type built-in)
+  :defer t
+  :mode ((rx ".toml" string-end) . toml-ts-mode))
+
+(use-package vimrc-mode
+  :defer t
+  :mode ((rx ".vim" string-end) . vimrc-mode))
+
+(use-package markdown-mode
   :defer t)
 
-(use-package toml-mode
+(use-package scala-mode
   :defer t)
 
 (use-package yaml-mode
