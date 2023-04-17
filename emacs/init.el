@@ -50,7 +50,7 @@
 (when (display-graphic-p)
   (if (eq system-type 'darwin)
     (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 150)
-    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 110)))
+    (set-face-attribute 'default nil :weight 'normal :font "Monego" :height 120)))
 
 ;; global settings
 (setq warning-minimum-level 'error)
@@ -125,11 +125,6 @@
                                 ))
   :init
   (vertico-mode +1))
-
-(if window-system
-    (use-package vertico-posframe
-    :config
-    (vertico-posframe-mode +1)))
 
 (use-package consult
   :bind (
@@ -247,8 +242,9 @@
 
 (use-package company
   :config
-  (setq company-idle-delay 0.2
-        company-minimum-prefix-length 1)
+  (setq company-idle-delay 0.0
+        company-minimum-prefix-length 1
+        company-format-margin-function 'company-text-icons-margin)
   (global-company-mode +1))
 
 (use-package all-the-icons)
@@ -266,8 +262,35 @@
 
 (use-package treesit
   :straight (:type built-in)
-  :init
-  (setq treesit-extra-load-path '("/usr/local/lib" "~/.config/treesit")))
+  :config
+  (setq treesit-language-source-alist
+   '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+     (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+     (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+     (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+     (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+     (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+     (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+     (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+     (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+     (make . ("https://github.com/alemuller/tree-sitter-make"))
+     (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+     (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+     (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "typescript/src" "typescript"))
+     (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+     (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+     (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+     (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+     (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
+  :config
+  (defun me/treesit-install-all-languages ()
+    "Install all languages specified by `treesit-language-source-alist'."
+    (interactive)
+    (let ((languages (mapcar 'car treesit-language-source-alist)))
+      (dolist (lang languages)
+	      (treesit-install-language-grammar lang)
+	      (message "`%s' parser was installed." lang)
+	      (sit-for 0.75)))))
 
 (use-package eglot
   :straight (:type built-in)
@@ -330,7 +353,10 @@
   :defer t
   :mode ((rx ".rs" string-end) . rust-ts-mode)
   :hook
-  (rust-ts-mode . eglot-ensure))
+  (rust-ts-mode . (lambda () (eglot-ensure) (cargo-minor-mode))))
+
+(use-package cargo
+  :defer t)
 
 (use-package toml-ts-mode
   :straight (:type built-in)
