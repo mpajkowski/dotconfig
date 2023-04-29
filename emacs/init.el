@@ -60,6 +60,7 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (blink-cursor-mode 0)
+(global-auto-revert-mode t)
 (setq visible-cursor nil)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message (format ";; Scratch buffer - started on %s\n\n" (current-time-string)))
