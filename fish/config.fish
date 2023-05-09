@@ -5,8 +5,7 @@ fish_add_path "$HOME/.fzf/bin"
 fish_add_path "$HOME/zig"
 fish_add_path "$HOME/zls"
 fish_add_path "/snap/bin"
-fish_add_path /opt/homebrew/opt/openjdk/bin
-test -e {$HOME}/.iterm2_shell_integration.fish ; and source {$HOME}/.iterm2_shell_integration.fish
+fish_add_path "/opt/homebrew/opt/openjdk/bin"
 set -gx ANDROID_SDK_ROOT "/opt/android-sdk"
 fish_add_path "$ANDROID_SDK_ROOT/platform-tools"
 fish_add_path "$ANDROID_SDK_ROOT/tools/bin"
@@ -15,6 +14,7 @@ fish_add_path "$ANDROID_SDK_ROOT/tools"
 fish_add_path "$HOME/flutter/flutter/bin"
 fish_add_path "/opt/local/bin"
 fish_add_path "/opt/homebrew/bin"
+fish_add_path "/opt/homebrew/opt/coreutils/libexec/gnubin"
 
 export MOZ_ENABLE_WAYLAND=1
 

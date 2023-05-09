@@ -1,24 +1,49 @@
-(setq straight-repository-branch "develop")
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+(defvar elpaca-installer-version 0.4)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil
+                              :files (:defaults (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (call-process "git" nil buffer t "clone"
+                                       (plist-get order :repo) repo)))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (kill-buffer buffer)
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
 
-(straight-use-package 'use-package)
-(setq use-package-always-ensure t)
-(setq straight-use-package-by-default t)
+(elpaca elpaca-use-package
+  (elpaca-use-package-mode)
+  (setq elpaca-use-package-by-default t)
+  (setq use-package-always-ensure t))
+
+(elpaca-wait)
 
 ;; mac
 (when (eq system-type 'darwin)
-  (customize-set-variable 'native-comp-driver-options '("-Wl,-w"))
   (setq mac-option-modifier 'alt)
   (setq mac-command-modifier 'meta))
 
@@ -32,19 +57,16 @@
 (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 (setq auto-window-vscroll nil)
 
-(use-package exec-path-from-shell
-  :init
-  (exec-path-from-shell-initialize))
-
-(use-package no-littering
+(use-package general
   :config
-   (setq no-littering-etc-directory
-	(expand-file-name "config/" user-emacs-directory))
-   (setq no-littering-var-directory
-	(expand-file-name "data/" user-emacs-directory))
-   (make-directory (no-littering-expand-var-file-name "auto-save/") t)
-   (setq auto-save-file-name-transforms
-	`((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+  (general-auto-unbind-keys)
+  (general-create-definer mleader-def
+    :states '(normal motion emacs)
+    :keymaps 'override
+    :prefix "SPC"
+    :non-normal-prefix "M-SPC"))
+
+(elpaca-wait)
 
 ;; font
 (when (display-graphic-p)
@@ -77,13 +99,17 @@
 (setq-default indent-tabs-mode nil)
 (setq enable-recursive-minibuffers t)
 (setq create-lockfiles nil)
+(setq make-backup-files nil)
 (setq auto-revert-verbose nil)
 (setq column-number-mode t)
 (setq split-width-threshold 9999)
 (setq split-height-threshold nil)
+(setq backup-directory-alist `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
 
 (use-package hl-line
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
   :hook
   (prog-mode . hl-line-mode)
   (text-mode . hl-line-mode)
@@ -96,14 +122,6 @@
   :config
   (gcmh-mode +1))
 
-(use-package general
-  :config
-  (general-auto-unbind-keys)
-  (general-create-definer mleader-def
-    :states '(normal motion emacs)
-    :prefix "SPC"
-    :non-normal-prefix "M-SPC"))
-
 (use-package orderless
   :init
   (setq completion-styles '(substring orderless basic)
@@ -111,19 +129,10 @@
         completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package vertico
-  :straight (vertico :files (:defaults "extensions/*")
-                     :includes (vertico-indexed
-                                vertico-flat
-                                vertico-grid
-                                vertico-mouse
-                                ;; vertico-quick
-                                vertico-buffer
-                                vertico-repeat
-                                vertico-reverse
-                                vertico-directory
-                                vertico-multiform
-                                vertico-unobtrusive
-                                ))
+  :elpaca (vertico :type git
+                   :host github
+                   :repo "minad/vertico"
+                   :files (:defaults "extensions/*"))
   :init
   (vertico-mode +1))
 
@@ -164,12 +173,18 @@
   (setq consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS")
   (setq consult-narrow-key "<"))
 
+(use-package consult-project-extra
+  :after (consult))
+
 (use-package savehist
+  :elpaca nil
+  :ensure nil
   :init
   (savehist-mode))
 
 (use-package uniquify
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
   :config
   (setq uniquify-separator "/"
         uniquify-buffer-name-style 'forward))
@@ -179,7 +194,6 @@
   (which-key-mode))
 
 (use-package tabspaces
-  :straight (:type git :host github :repo "mclear-tools/tabspaces")
   :commands (tabspaces-switch-or-create-workspace
              tabspaces-open-or-create-project-and-workspace)
   :init
@@ -209,6 +223,7 @@
     (add-to-list 'consult-buffer-sources 'consult--source-workspace))
   (defun me/tabspaces-switch-project ()
     (interactive)
+     (project--ensure-read-project-list)
      (call-interactively 'tabspaces-open-or-create-project-and-workspace)
      (let ((scratch (get-buffer "*scratch*")))
        (tabspaces-remove-selected-buffer scratch))))
@@ -216,30 +231,55 @@
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
   :config
-  (setq doom-modeline-persp-name              nil
-        doom-modeline-buffer-encoding         nil
-        doom-modeline-icon                    t
+  (setq doom-modeline-buffer-encoding nil
+        doom-modeline-icon t
+        doom-modeline-lsp t
         doom-modeline-buffer-file-name-style  'truncate-with-project))
 
+(use-package rainbow-delimiters
+  :hook
+  (prog-mode . rainbow-delimiters-mode))
 
 (use-package evil
+  :demand t
   :init
-  (setq evil-want-keybinding nil
-        evil-want-integration t
+  (setq evil-want-integration t
+        evil-want-keybinding nil
         evil-undo-system 'undo-redo)
   :config
   (evil-mode +1))
-
-(use-package evil-numbers
-  :after (evil)
-  :config
-  (general-def '(normal visual) "C-c =" 'evil-numbers/inc-at-pt)
-  (general-def '(normal visual) "C-c -" 'evil-numbers/dec-at-pt))
 
 (use-package evil-collection
   :after (evil)
   :config
   (evil-collection-init))
+
+(use-package dired
+  :elpaca nil
+  :ensure nil
+  :after (evil evil-collection)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map " " 'nil)
+  (general-def 'normal dired-mode-map "h" 'dired-up-directory)
+  (general-def 'normal dired-mode-map "l" 'dired-find-file)
+  (setf dired-kill-when-opening-new-dired-buffer t))
+
+(use-package nerd-icons
+  :demand t)
+
+(use-package nerd-icons-dired
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package nerd-icons-completion
+  :config
+  (nerd-icons-completion-mode))
+
+(use-package evil-numbers
+  :after (evil evil-collection)
+  :config
+  (general-def '(normal visual) "C-c =" 'evil-numbers/inc-at-pt)
+  (general-def '(normal visual) "C-c -" 'evil-numbers/dec-at-pt))
 
 (use-package company
   :config
@@ -248,10 +288,8 @@
         company-format-margin-function 'company-text-icons-margin)
   (global-company-mode +1))
 
-(use-package all-the-icons)
-
 (use-package doom-themes
-  :after (all-the-icons)
+  :after (nerd-icons)
   :config
   (setq doom-themes-enable-bold t
         doom-theme-enable-italic t)
@@ -262,7 +300,8 @@
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
 (use-package treesit
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
   :config
   (setq treesit-language-source-alist
    '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
@@ -294,7 +333,8 @@
 	      (sit-for 0.75)))))
 
 (use-package eglot
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
   :hook
   (eglot-managed-mode . (lambda () (eldoc-mode -1) (eglot-inlay-hints-mode -1)))
   (before-save . eglot-format-buffer)
@@ -306,12 +346,19 @@
                                                 :extraArgs ["--target-dir" "/tmp/rust-analyzer-check" "--" "-D" "warnings"])
                                   :cargo (:features "all")))))
 
-(use-package eldoc-box)
-
-(fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point)
+(use-package eldoc-box
+  :elpaca (eldoc-box :type git
+                     :host github
+                     :repo "casouri/eldoc-box"
+                     :ref "c39eb56"
+                     :depth nil)
+  :config
+  (fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point))
 
 (use-package flymake
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
+  :after (evil)
   :config
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
@@ -327,14 +374,12 @@
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
-(use-package vterm
-  :defer t)
+(use-package vterm)
 
 (use-package multi-vterm
-  :defer t
+  :after (vterm)
   :config
   (setq multi-vterm-dedicated-window-height-percent 30))
-
 
 (use-package restclient
   :defer t)
@@ -350,7 +395,8 @@
 
 ;; languages
 (use-package rust-ts-mode
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
   :defer t
   :mode ((rx ".rs" string-end) . rust-ts-mode)
   :hook
@@ -360,7 +406,8 @@
   :defer t)
 
 (use-package toml-ts-mode
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
   :defer t
   :mode ((rx ".toml" string-end) . toml-ts-mode))
 
@@ -386,13 +433,15 @@
   (zig-mode . eglot-ensure))
 
 (use-package c++-mode
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
   :defer t
   :hook
   (c++-mode . eglot-ensure))
 
 (use-package c-mode
-  :straight (:type built-in)
+  :elpaca nil
+  :ensure nil
   :defer t
   :hook
   (c-mode . eglot-ensure))
@@ -400,12 +449,19 @@
 (use-package csv-mode
   :defer t)
 
+(use-package kubel)
+
+(elpaca-wait)
+
 ;; bindings
 (general-def 'normal 'global "zs" 'save-buffer)
 
 (mleader-def '(normal motion emacs) 'global "pp" 'me/tabspaces-switch-project)
-(mleader-def '(normal motion emacs) 'global "pf" 'project-find-file)
+(mleader-def '(normal motion emacs) 'global "eb" 'eval-buffer)
+(mleader-def '(normal motion emacs) 'global "er" 'eval-region)
+(mleader-def '(normal motion emacs) 'global "pf" 'consult-project-extra-find)
 (mleader-def '(normal motion emacs) 'global "b" 'consult-buffer)
+(mleader-def '(normal motion emacs) 'global "ok" 'kubel)
 (mleader-def '(normal motion emacs) 'global "nn" 'treemacs)
 (mleader-def '(normal motion emacs) 'global "tt" 'multi-vterm-project)
 (mleader-def '(normal motion emacs) 'global "h" 'windmove-left)
@@ -417,5 +473,7 @@
 (mleader-def '(normal motion emacs) 'global "rg" 'consult-ripgrep)
 (general-def 'normal 'global "ga" 'eglot-code-actions)
 (mleader-def 'normal 'global "mv" 'eglot-rename)
-(general-def 'normal 'global "K" 'eldoc-doc-buffer)
+(general-def 'normal 'global "K" 'eldoc-box-help-at-point)
 (mleader-def '(normal motion emacs) 'global "cl" 'me/flymake-clear-diagnostics)
+
+(message "hejka")
