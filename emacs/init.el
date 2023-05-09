@@ -449,7 +449,25 @@
 (use-package csv-mode
   :defer t)
 
-(use-package kubel)
+(use-package kubel
+  :defer t)
+
+(use-package osm
+  :bind (("C-c m h" . osm-home)
+         ("C-c m s" . osm-search)
+         ("C-c m v" . osm-server)
+         ("C-c m t" . osm-goto)
+         ("C-c m x" . osm-gpx-show)
+         ("C-c m j" . osm-bookmark-jump))
+
+  :config
+  (setq osm-server 'default)
+  (setq osm-copyright t))
+
+
+(use-package fretboard
+  :elpaca (fretboard :host github :repo "vifon/fretboard.el")
+  :defer t)
 
 (elpaca-wait)
 
