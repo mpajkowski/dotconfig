@@ -106,6 +106,15 @@
 (setq split-height-threshold nil)
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+;;(pixel-scroll-precision-mode +1)
+(setq scroll-preserve-screen-position 'always)
+(add-hook 'after-init-hook
+          #'(lambda ()
+              (setq gc-cons-threshold (* 100 1000 1000))))
+(add-hook 'focus-out-hook 'garbage-collect)
+(run-with-idle-timer 5 t 'garbage-collect)
+
+
 
 (use-package hl-line
   :elpaca nil
@@ -117,10 +126,6 @@
   (setq hl-line-sticky-flag nil))
 
 (modify-syntax-entry ?_ "w")
-
-(use-package gcmh
-  :config
-  (gcmh-mode +1))
 
 (use-package orderless
   :init
@@ -203,8 +208,7 @@
         tabspaces-default-tab "Default"
         tabspaces-remove-to-default t
         tabspaces-include-buffers '("*scratch*")
-        tab-bar-new-tab-choice "*scratch*"
-        tab-bar-new-tab-to "rightmost")
+        tab-bar-new-tab-choice "*scratch*")
   (with-eval-after-load 'consult
     (consult-customize consult--source-buffer :hidden t :default nil)
     ;; set consult-workspace buffer list
@@ -336,9 +340,9 @@
   :elpaca nil
   :ensure nil
   :hook
-  (eglot-managed-mode . (lambda () (eldoc-mode -1) (eglot-inlay-hints-mode -1)))
+  (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)))
   (before-save . eglot-format-buffer)
-  :config
+  :init
   (setq eglot-stay-out-of '(eldoc))
   (setq-default eglot-workspace-configuration
                 '(:rust-analyzer (:checkOnSave (:enable t
@@ -346,11 +350,17 @@
                                                 :extraArgs ["--target-dir" "/tmp/rust-analyzer-check" "--" "-D" "warnings"])
                                   :cargo (:features "all")))))
 
+(use-package eldoc
+  :elpaca nil
+  :ensure nil
+  :config
+  (setq eldoc-echo-area-use-multiline-p nil))
+
 (use-package eldoc-box
   :elpaca (eldoc-box :type git
                      :host github
                      :repo "casouri/eldoc-box"
-                     :ref "c39eb56"
+                     :ref "d7d302989ea726885927963d7772e5430072e27a"
                      :depth nil)
   :config
   (fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point))
@@ -359,6 +369,14 @@
   :elpaca nil
   :ensure nil
   :after (evil)
+  :init
+  (add-to-list 'display-buffer-alist
+               `(,(rx bos "*Flymake")
+                 (display-buffer-reuse-window
+                  display-buffer-in-side-window)
+                 (side            . bottom)
+                 (reusable-frames . visible)
+                 (window-height   . 0.33)))
   :config
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
@@ -374,7 +392,17 @@
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
-(use-package vterm)
+(use-package vterm
+  :init
+  (add-to-list 'display-buffer-alist
+               `(,(rx bos "*vterminal")
+                 (display-buffer-reuse-window
+                  display-buffer-in-side-window)
+                 (side            . bottom)
+                 (reusable-frames . visible)
+                 (window-height   . 0.33)))
+  :config
+  (setq vterm-timer-delay 0.01))
 
 (use-package multi-vterm
   :after (vterm)
@@ -453,6 +481,7 @@
   :defer t)
 
 (use-package osm
+  :defer t
   :bind (("C-c m h" . osm-home)
          ("C-c m s" . osm-search)
          ("C-c m v" . osm-server)

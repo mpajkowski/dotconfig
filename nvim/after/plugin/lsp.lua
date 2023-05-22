@@ -43,7 +43,7 @@ local function on_attach(client, bufnr)
     vim.keymap.set("n", "<leader>mv", vim.lsp.buf.rename, opts)
     vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
 
-    vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.formatting_sync()]]
+    vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format({ async = false})]]
 end
 
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
