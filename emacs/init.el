@@ -384,7 +384,12 @@
   (defun me/flymake-clear-diagnostics ()
     "Removes diagnostics list"
     (interactive)
-    (setq flymake-list-only-diagnostics '())))
+    (setq flymake-list-only-diagnostics '()))
+  (defun me/flymake-show-current-project-diagnostics ()
+    "Displays diagnostics of current project"
+     (interactive)
+     (require 'flymake)
+     (consult-flymake (project-current))))
 
 (use-package yasnippet
   :config
@@ -516,7 +521,7 @@
 (mleader-def '(normal motion emacs) 'global "k" 'windmove-up)
 (mleader-def '(normal motion emacs) 'global "l" 'windmove-right)
 
-(mleader-def '(normal motion emacs) 'global "dg" 'flymake-show-project-diagnostics)
+(mleader-def '(normal motion emacs) 'global "dg" 'me/flymake-show-current-project-diagnostics)
 (mleader-def '(normal motion emacs) 'global "rg" 'consult-ripgrep)
 (general-def 'normal 'global "ga" 'eglot-code-actions)
 (mleader-def 'normal 'global "mv" 'eglot-rename)
