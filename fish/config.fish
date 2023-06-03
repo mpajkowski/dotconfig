@@ -15,6 +15,7 @@ fish_add_path "$HOME/flutter/flutter/bin"
 fish_add_path "/opt/local/bin"
 fish_add_path "/opt/homebrew/bin"
 fish_add_path "/opt/homebrew/opt/coreutils/libexec/gnubin"
+fish_add_path "/opt/homebrew/opt/gnu-sed/libexec/gnubin"
 
 export MOZ_ENABLE_WAYLAND=1
 

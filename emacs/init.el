@@ -83,6 +83,7 @@
 (scroll-bar-mode -1)
 (blink-cursor-mode 0)
 (global-auto-revert-mode t)
+(show-paren-mode -1)
 (setq visible-cursor nil)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message (format ";; Scratch buffer - started on %s\n\n" (current-time-string)))
@@ -240,10 +241,6 @@
         doom-modeline-lsp t
         doom-modeline-buffer-file-name-style  'truncate-with-project))
 
-(use-package rainbow-delimiters
-  :hook
-  (prog-mode . rainbow-delimiters-mode))
-
 (use-package evil
   :demand t
   :init
@@ -370,13 +367,13 @@
   :ensure nil
   :after (evil)
   :init
-  (add-to-list 'display-buffer-alist
-               `(,(rx bos "*Flymake")
-                 (display-buffer-reuse-window
-                  display-buffer-in-side-window)
-                 (side            . bottom)
-                 (reusable-frames . visible)
-                 (window-height   . 0.33)))
+  ;(add-to-list 'display-buffer-alist
+  ;             `(,(rx bos "*Flymake")
+  ;               (display-buffer-reuse-window
+  ;                display-buffer-in-side-window)
+  ;               (side            . bottom)
+  ;               (reusable-frames . visible)
+  ;               (window-height   . 0.33)))
   :config
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
@@ -384,12 +381,7 @@
   (defun me/flymake-clear-diagnostics ()
     "Removes diagnostics list"
     (interactive)
-    (setq flymake-list-only-diagnostics '()))
-  (defun me/flymake-show-current-project-diagnostics ()
-    "Displays diagnostics of current project"
-     (interactive)
-     (require 'flymake)
-     (consult-flymake (project-current))))
+    (setq flymake-list-only-diagnostics '())))
 
 (use-package yasnippet
   :config
@@ -398,6 +390,24 @@
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
 (use-package vterm
+  :elpaca (vterm :post-build
+                 (progn
+                   (setq vterm-always-compile-module t)
+                   (require 'vterm)
+                   ;;print compilation info for elpaca
+                   (with-current-buffer (get-buffer-create vterm-install-buffer-name)
+                     (goto-char (point-min))
+                     (while (not (eobp))
+                       (message "%S"
+                                (buffer-substring (line-beginning-position)
+                                                  (line-end-position)))
+                       (forward-line)))
+                   (when-let ((so (expand-file-name "./vterm-module.so"))
+                              ((file-exists-p so)))
+                     (make-symbolic-link
+                      so (expand-file-name (file-name-nondirectory so)
+                                           "../../builds/vterm")
+                      'ok-if-already-exists))))
   :init
   (add-to-list 'display-buffer-alist
                `(,(rx bos "*vterminal")
@@ -416,7 +426,6 @@
 
 (use-package restclient
   :defer t)
-
 
 (use-package magit
   :defer t)
@@ -521,7 +530,7 @@
 (mleader-def '(normal motion emacs) 'global "k" 'windmove-up)
 (mleader-def '(normal motion emacs) 'global "l" 'windmove-right)
 
-(mleader-def '(normal motion emacs) 'global "dg" 'me/flymake-show-current-project-diagnostics)
+(mleader-def '(normal motion emacs) 'global "dg" 'flymake-show-project-diagnostics)
 (mleader-def '(normal motion emacs) 'global "rg" 'consult-ripgrep)
 (general-def 'normal 'global "ga" 'eglot-code-actions)
 (mleader-def 'normal 'global "mv" 'eglot-rename)
