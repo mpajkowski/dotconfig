@@ -199,39 +199,11 @@
   :init
   (which-key-mode))
 
-(use-package tabspaces
-  :commands (tabspaces-switch-or-create-workspace
-             tabspaces-open-or-create-project-and-workspace)
+(use-package project-tab-groups
+  :elpaca (project-tab-groups :type git
+                              :repo "~/proj-toy/project-tab-groups")
   :init
-  (tabspaces-mode +1)
-  :config
-  (setq tabspaces-use-filtered-buffers-as-default t
-        tabspaces-default-tab "Default"
-        tabspaces-remove-to-default t
-        tabspaces-include-buffers '("*scratch*")
-        tab-bar-new-tab-choice "*scratch*")
-  (with-eval-after-load 'consult
-    (consult-customize consult--source-buffer :hidden t :default nil)
-    ;; set consult-workspace buffer list
-    (defvar consult--source-workspace
-    (list :name     "Workspace Buffers"
-          :narrow   ?w
-          :history  'buffer-name-history
-          :category 'buffer
-          :state    #'consult--buffer-state
-          :default  t
-          :items    (lambda () (consult--buffer-query
-                          :predicate #'tabspaces--local-buffer-p
-                          :sort 'visibility
-                          :as #'buffer-name)))
-    "Set workspace buffer list for consult-buffer.")
-    (add-to-list 'consult-buffer-sources 'consult--source-workspace))
-  (defun me/tabspaces-switch-project ()
-    (interactive)
-     (project--ensure-read-project-list)
-     (call-interactively 'tabspaces-open-or-create-project-and-workspace)
-     (let ((scratch (get-buffer "*scratch*")))
-       (tabspaces-remove-selected-buffer scratch))))
+  (project-tab-groups-mode 1))
 
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
@@ -517,11 +489,11 @@
 ;; bindings
 (general-def 'normal 'global "zs" 'save-buffer)
 
-(mleader-def '(normal motion emacs) 'global "pp" 'me/tabspaces-switch-project)
+(mleader-def '(normal motion emacs) 'global "pp" 'project-switch-project)
 (mleader-def '(normal motion emacs) 'global "eb" 'eval-buffer)
 (mleader-def '(normal motion emacs) 'global "er" 'eval-region)
 (mleader-def '(normal motion emacs) 'global "pf" 'consult-project-extra-find)
-(mleader-def '(normal motion emacs) 'global "b" 'consult-buffer)
+(mleader-def '(normal motion emacs) 'global "b" 'consult-project-buffer)
 (mleader-def '(normal motion emacs) 'global "ok" 'kubel)
 (mleader-def '(normal motion emacs) 'global "nn" 'treemacs)
 (mleader-def '(normal motion emacs) 'global "tt" 'multi-vterm-project)
