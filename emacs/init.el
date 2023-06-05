@@ -83,7 +83,6 @@
 (scroll-bar-mode -1)
 (blink-cursor-mode 0)
 (global-auto-revert-mode t)
-(show-paren-mode -1)
 (setq visible-cursor nil)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message (format ";; Scratch buffer - started on %s\n\n" (current-time-string)))
@@ -180,7 +179,11 @@
   (setq consult-narrow-key "<"))
 
 (use-package consult-project-extra
-  :after (consult))
+  :after (consult)
+  :config
+  (setq consult-project-extra-sources
+        (list consult-project-extra--source-buffer
+              consult-project-extra--source-file)))
 
 (use-package savehist
   :elpaca nil
@@ -200,9 +203,8 @@
   (which-key-mode))
 
 (use-package project-tab-groups
-  :elpaca (project-tab-groups :type git
-                              :repo "~/proj-toy/project-tab-groups")
   :init
+  (setq tab-bar-format '(tab-bar-format-history tab-bar-format-tabs-groups tab-bar-separator tab-bar-format-add-tab))
   (project-tab-groups-mode 1))
 
 (use-package doom-modeline
