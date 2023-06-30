@@ -16,6 +16,8 @@ fish_add_path "/opt/local/bin"
 fish_add_path "/opt/homebrew/bin"
 fish_add_path "/opt/homebrew/opt/coreutils/libexec/gnubin"
 fish_add_path "/opt/homebrew/opt/gnu-sed/libexec/gnubin"
+fish_add_path "$HOME/Library/Application Support/Coursier/bin"
+fish_add_path "/Applications/Emacs.app/Contents/MacOS/bin"
 
 export MOZ_ENABLE_WAYLAND=1
 
@@ -47,8 +49,3 @@ if [ "$INSIDE_EMACS" = 'vterm' ]
 else
     fish_vi_key_bindings
 end
-
-
-#function fish_right_prompt -d "Write out the right prompt"
-#    kubectl config get-contexts | grep '*' | awk '{ print $2 }'
-#end

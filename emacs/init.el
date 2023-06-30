@@ -1,4 +1,4 @@
-(defvar elpaca-installer-version 0.4)
+(defvar elpaca-installer-version 0.5)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
@@ -69,10 +69,9 @@
 (elpaca-wait)
 
 ;; font
-(when (display-graphic-p)
-  (if (eq system-type 'darwin)
-    (set-face-attribute 'default nil :weight 'normal :font "Monaco" :height 150)
-    (set-face-attribute 'default nil :weight 'normal :font "Monego" :height 120)))
+(if (eq system-type 'darwin)
+    (add-to-list 'default-frame-alist '(font . "Monaco-15"))
+    (add-to-list 'default-frame-alist '(font . "Monego-12")))
 
 ;; global settings
 (setq warning-minimum-level 'error)
@@ -185,6 +184,13 @@
         (list consult-project-extra--source-buffer
               consult-project-extra--source-file)))
 
+(use-package marginalia
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+
+  :init
+  (marginalia-mode))
+
 (use-package savehist
   :elpaca nil
   :ensure nil
@@ -198,6 +204,10 @@
   (setq uniquify-separator "/"
         uniquify-buffer-name-style 'forward))
 
+(use-package buffer-name-relative
+  :init
+  (buffer-name-relative-mode))
+
 (use-package which-key
   :init
   (which-key-mode))
@@ -207,9 +217,10 @@
   (setq tab-bar-format '(tab-bar-format-history tab-bar-format-tabs-groups tab-bar-separator tab-bar-format-add-tab))
   (project-tab-groups-mode 1))
 
+
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
-  :config
+  :init
   (setq doom-modeline-buffer-encoding nil
         doom-modeline-icon t
         doom-modeline-lsp t
@@ -256,12 +267,12 @@
   (general-def '(normal visual) "C-c =" 'evil-numbers/inc-at-pt)
   (general-def '(normal visual) "C-c -" 'evil-numbers/dec-at-pt))
 
-(use-package company
-  :config
-  (setq company-idle-delay 0.0
-        company-minimum-prefix-length 1
-        company-format-margin-function 'company-text-icons-margin)
-  (global-company-mode +1))
+;;(use-package company
+;;  :config
+;;  (setq company-idle-delay 0.1
+;;        company-minimum-prefix-length 1
+;;        company-format-margin-function 'company-text-icons-margin)
+;;  (global-company-mode +1))
 
 (use-package doom-themes
   :after (nerd-icons)
@@ -307,11 +318,32 @@
 	      (message "`%s' parser was installed." lang)
 	      (sit-for 0.75)))))
 
+
+(use-package corfu
+  :config
+  (setq corfu-cycle t)
+  (setq corfu-auto t)
+  (setq corfu-auto-delay 0)
+  (global-corfu-mode))
+
+(use-package cape
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-dict)
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
+
 (use-package eglot
   :elpaca nil
   :ensure nil
   :hook
-  (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)))
+  (eglot-managed-mode . (lambda ()
+                          (eglot-inlay-hints-mode -1)
+                          (setq-local completion-at-point-functions
+                                      (list
+                                       (cape-super-capf
+                                        #'eglot-completion-at-point
+                                        #'cape-keyword)))))
   (before-save . eglot-format-buffer)
   :init
   (setq eglot-stay-out-of '(eldoc))
@@ -320,7 +352,6 @@
                                                 :command "clippy"
                                                 :extraArgs ["--target-dir" "/tmp/rust-analyzer-check" "--" "-D" "warnings"])
                                   :cargo (:features "all")))))
-
 (use-package eldoc
   :elpaca nil
   :ensure nil
@@ -391,7 +422,7 @@
                  (reusable-frames . visible)
                  (window-height   . 0.33)))
   :config
-  (setq vterm-timer-delay 0.01))
+  (setq vterm-timer-delay 0.05))
 
 (use-package multi-vterm
   :after (vterm)
@@ -435,7 +466,19 @@
   :defer t)
 
 (use-package scala-mode
-  :defer t)
+  :defer t
+  :interpreter ("scala" . scala-mode))
+
+(use-package sbt-mode
+  :defer t
+  :after (scala-mode)
+  :config
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+   ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+   (setq sbt:program-options '("-Dsbt.supershell=false")))
 
 (use-package yaml-mode
   :defer t)
@@ -481,10 +524,6 @@
   (setq osm-server 'default)
   (setq osm-copyright t))
 
-
-(use-package fretboard
-  :elpaca (fretboard :host github :repo "vifon/fretboard.el")
-  :defer t)
 
 (elpaca-wait)
 

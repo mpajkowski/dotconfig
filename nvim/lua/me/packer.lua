@@ -17,7 +17,7 @@ return require("packer").startup(function(use)
         use("nvim-tree/nvim-web-devicons")
 
         use("neovim/nvim-lspconfig")
-        use("j-hui/fidget.nvim")
+        use { "j-hui/fidget.nvim", tag = "legacy" }
         use("folke/trouble.nvim")
         use("diepm/vim-rest-console")
 

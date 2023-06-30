@@ -7,7 +7,7 @@ end
 local cfg = {
     options = {
         icons_enabled = false,
-        theme = 'base16',
+        theme = 'onedark',
         component_separators = { left = '', right = '' },
         section_separators = { left = '', right = '' },
         disabled_filetypes = {
