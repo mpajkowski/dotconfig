@@ -4,6 +4,8 @@ local function current_time()
     return os.date("%H:%M")
 end
 
+vim.g.base16_no_fallback = true
+
 local cfg = {
     options = {
         icons_enabled = false,

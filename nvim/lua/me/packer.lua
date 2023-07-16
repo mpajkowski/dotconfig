@@ -12,7 +12,7 @@ return require("packer").startup(function(use)
         use("tpope/vim-fugitive")
         use("kristijanhusak/vim-hybrid-material")
         use("ojroques/nvim-bufdel")
-        use({"nvim-lualine/lualine.nvim", requires = {'RRethy/nvim-base16'}})
+        use({"nvim-lualine/lualine.nvim", requires = { 'RRethy/nvim-base16' }})
         use("nvim-telescope/telescope-file-browser.nvim")
         use("nvim-tree/nvim-web-devicons")
 
