@@ -382,6 +382,7 @@
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
 (use-package vterm
+  :after (evil evil-collection)
   :elpaca (vterm :post-build
                  (progn
                    (setq vterm-always-compile-module t)
@@ -409,6 +410,11 @@
                  (reusable-frames . visible)
                  (window-height   . 0.33)))
   :config
+  (defun evil-collection-vterm-append ()
+    "Append character after cursor. Fixes evil collection"
+    (interactive)
+    (vterm-goto-char (1+ (point)))
+    (call-interactively #'evil-append))
   (setq vterm-timer-delay 0.05))
 
 (use-package multi-vterm
