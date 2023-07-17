@@ -449,7 +449,13 @@
   :elpaca nil
   :ensure nil
   :defer t
-  :mode ((rx ".toml" string-end) . toml-ts-mode))
+  :mode ("\\(?:Dockerfile\\|dockerfile\\)\\(?:\\..*\\)?" . dockerfile-ts-mode))
+
+(use-package dockerfile-ts-mode
+  :elpaca nil
+  :ensure nil
+  :defer t
+  :mode ((rx "Dockerfile" string-end) . dockerfile-ts-mode))
 
 (use-package vimrc-mode
   :defer t
