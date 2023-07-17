@@ -113,8 +113,6 @@
 (add-hook 'focus-out-hook 'garbage-collect)
 (run-with-idle-timer 5 t 'garbage-collect)
 
-
-
 (use-package hl-line
   :elpaca nil
   :ensure nil
@@ -238,14 +236,15 @@
 (use-package evil-collection
   :after (evil)
   :config
+  (setq evil-collection-key-blacklist '("SPC"))
   (evil-collection-init))
 
 (use-package dired
-  :elpaca nil
   :ensure nil
+  :elpaca nil
+  :demand t
   :after (evil evil-collection)
   :config
-  (evil-collection-define-key 'normal 'dired-mode-map " " 'nil)
   (general-def 'normal dired-mode-map "h" 'dired-up-directory)
   (general-def 'normal dired-mode-map "l" 'dired-find-file)
   (setf dired-kill-when-opening-new-dired-buffer t))
@@ -266,13 +265,6 @@
   :config
   (general-def '(normal visual) "C-c =" 'evil-numbers/inc-at-pt)
   (general-def '(normal visual) "C-c -" 'evil-numbers/dec-at-pt))
-
-;;(use-package company
-;;  :config
-;;  (setq company-idle-delay 0.1
-;;        company-minimum-prefix-length 1
-;;        company-format-margin-function 'company-text-icons-margin)
-;;  (global-company-mode +1))
 
 (use-package doom-themes
   :after (nerd-icons)
@@ -371,18 +363,13 @@
   :elpaca nil
   :ensure nil
   :after (evil)
-  :init
-  ;(add-to-list 'display-buffer-alist
-  ;             `(,(rx bos "*Flymake")
-  ;               (display-buffer-reuse-window
-  ;                display-buffer-in-side-window)
-  ;               (side            . bottom)
-  ;               (reusable-frames . visible)
-  ;               (window-height   . 0.33)))
   :config
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
   (general-def 'normal flymake-project-diagnostics-mode-map "ZZ" 'kill-buffer-and-window)
+  (defun me/consult-flymake-project-diagnostics ()
+    (interactive)
+    (consult-flymake t))
   (defun me/flymake-clear-diagnostics ()
     "Removes diagnostics list"
     (interactive)
