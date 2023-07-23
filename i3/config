@@ -17,9 +17,11 @@ font pango:Monego 18px
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex --autostart --environment i3
 
-# NetworkManager is the most popular way to manage wireless networks on Linux,
-# and nm-applet is a desktop environment-independent system tray GUI for it.
-exec --no-startup-id nm-applet
+exec --no-startup-id xset r rate 300 50
+exec --no-startup-id xrdb -merge ~/.Xresources
+
+default_border pixel 1
+default_floating_border pixel 1
 
 # use these keys for focus, movement, and resize directions when reaching for
 # the arrows is not convenient
@@ -36,7 +38,7 @@ floating_modifier Mod1
 tiling_drag modifier titlebar
 
 # start a terminal
-bindsym Mod1+Shift+Return exec kitty
+bindsym Mod1+Shift+Return exec ~/.local/bin/kitty
 
 # kill focused window
 bindsym Mod1+Shift+q kill
@@ -69,15 +71,15 @@ bindsym Mod1+Shift+Up move up
 bindsym Mod1+Shift+Right move right
 
 # split in horizontal orientation
-bindsym Mod1+minus split h
+bindsym Mod1+b split h
 
 # split in vertical orientation
-bindsym Mod1+semicolon split v
+bindsym Mod1+v split v
 
 # enter fullscreen mode for the focused container
 bindsym Mod1+f fullscreen toggle
 
-# change container layout (stacked, tabbed, toggle split)
+# change container layout ()
 bindsym Mod1+s layout stacking
 bindsym Mod1+w layout tabbed
 bindsym Mod1+e layout toggle split
@@ -165,3 +167,5 @@ bindsym Mod1+r mode "resize"
 bar {
     status_command i3status
 }
+
+exec --no-startup-id picom --fade-in-step=1 --fade-out-step=1 --fade-delta=0

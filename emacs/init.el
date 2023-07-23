@@ -367,13 +367,9 @@
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
   (general-def 'normal flymake-project-diagnostics-mode-map "ZZ" 'kill-buffer-and-window)
-  (require 'cl-lib)
-  (defun me/sort-flymake-diagnostics-by-type (diagnostics)
-  (cl-sort diagnostics
-          (lambda (diag1 diag2)
-              (string-lessp (flymake--diag-type diag1)
-                          (flymake--diag-type diag2)))))
-  (setq flymake-diagnostic-functions (cons 'me/sort-flymake-diagnostics-by-type flymake-diagnostic-functions))
+  (defun me/consult-flymake-project-diagnostics ()
+    (interactive)
+    (consult-flymake t))
   (defun me/flymake-clear-diagnostics ()
     "Removes diagnostics list"
     (interactive)
