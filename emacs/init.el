@@ -139,6 +139,7 @@
   (vertico-mode +1))
 
 (use-package consult
+  :demand t
   :bind (
          ("C-c M-x" . consult-mode-command)
          ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
@@ -188,6 +189,13 @@
 
   :init
   (marginalia-mode))
+
+(use-package project
+  :elpaca nil
+  :ensure nil
+  :after (consult)
+  :config
+  (add-to-list 'project-switch-commands '(consult-ripgrep "Ripgrep" "r") t))
 
 (use-package savehist
   :elpaca nil
