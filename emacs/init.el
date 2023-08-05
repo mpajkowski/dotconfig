@@ -42,6 +42,23 @@
 
 (elpaca-wait)
 
+(add-to-list 'display-buffer-alist
+ '(me/window-bottom-left-side-window-p
+   (display-buffer-in-side-window)
+   (window-height . 0.30)
+   (window-width . 0.55)
+   (dedicated . t)
+   (side . bottom)
+   (slot . 0)
+   (window-parameters . ((no-other-window . t)
+                         (no-delete-other-windows . t)
+                         (mode-line-format . 'none)))))
+
+(defvar me/window-bottom-left-modes '())
+
+(defun me/window-bottom-left-side-window-p (buf act)
+ (with-current-buffer buf (member major-mode me/window-bottom-left-modes)))
+
 ;; mac
 (when (eq system-type 'darwin)
   (setq mac-option-modifier 'alt)
@@ -105,7 +122,6 @@
 (setq split-height-threshold nil)
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
-;;(pixel-scroll-precision-mode +1)
 (setq scroll-preserve-screen-position 'always)
 (add-hook 'after-init-hook
           #'(lambda ()
@@ -346,7 +362,6 @@
                                         #'cape-keyword)))))
   (before-save . eglot-format-buffer)
   :init
-  (setq eglot-stay-out-of '(eldoc))
   (setq-default eglot-workspace-configuration
                 '(:rust-analyzer (:checkOnSave (:enable t
                                                 :command "clippy"
@@ -358,19 +373,13 @@
   :config
   (setq eldoc-echo-area-use-multiline-p nil))
 
-(use-package eldoc-box
-  :elpaca (eldoc-box :type git
-                     :host github
-                     :repo "casouri/eldoc-box"
-                     :ref "d7d302989ea726885927963d7772e5430072e27a"
-                     :depth nil)
-  :config
-  (fset 'eldoc-doc-buffer 'eldoc-box-eglot-help-at-point))
 
 (use-package flymake
   :elpaca nil
   :ensure nil
   :after (evil)
+  :init
+  ;(add-to-list 'me/window-bottom-left-modes 'flymake-project-diagnostics-mode)
   :config
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
@@ -410,13 +419,7 @@
                                            "../../builds/vterm")
                       'ok-if-already-exists))))
   :init
-  (add-to-list 'display-buffer-alist
-               `(,(rx bos "*vterminal")
-                 (display-buffer-reuse-window
-                  display-buffer-in-side-window)
-                 (side            . bottom)
-                 (reusable-frames . visible)
-                 (window-height   . 0.33)))
+  (add-to-list 'me/window-bottom-left-modes 'vterm-mode)
   :config
   (defun evil-collection-vterm-append ()
     "Append character after cursor. Fixes evil collection"
@@ -426,9 +429,7 @@
   (setq vterm-timer-delay 0.05))
 
 (use-package multi-vterm
-  :after (vterm)
-  :config
-  (setq multi-vterm-dedicated-window-height-percent 30))
+  :after (vterm))
 
 (use-package restclient
   :defer t)
@@ -554,7 +555,6 @@
 (mleader-def '(normal motion emacs) 'global "rg" 'consult-ripgrep)
 (general-def 'normal 'global "ga" 'eglot-code-actions)
 (mleader-def 'normal 'global "mv" 'eglot-rename)
-(general-def 'normal 'global "K" 'eldoc-box-help-at-point)
 (mleader-def '(normal motion emacs) 'global "cl" 'me/flymake-clear-diagnostics)
 
 (message "hejka")

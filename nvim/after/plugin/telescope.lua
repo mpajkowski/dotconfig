@@ -9,7 +9,7 @@ end
 
 vim.keymap.set("n", "<leader>pf", find_files, {})
 vim.keymap.set("n", "<leader>rg", builtin.live_grep, {})
-vim.keymap.set("n", "<leader>pb", builtin.buffers, {})
+vim.keymap.set("n", "<leader>b", builtin.buffers, {})
 
 telescope.setup({
     wrap_results = true,

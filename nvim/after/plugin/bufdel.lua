@@ -5,4 +5,4 @@ bufdel.setup {
     quit = true
 }
 
-vim.keymap.set('n', '<leader>bd', vim.cmd.BufDel, { noremap = true })
+vim.keymap.set('n', '<C-x>k', vim.cmd.BufDel, { noremap = true })
