@@ -20,6 +20,7 @@ fish_add_path "$HOME/Library/Application Support/Coursier/bin"
 fish_add_path "/Applications/Emacs.app/Contents/MacOS/bin"
 
 export MOZ_ENABLE_WAYLAND=1
+export DYLD_INSERT_LIBRARIES=/opt/homebrew/opt/curl/lib/libcurl.dylib
 
 if [ "$INSIDE_EMACS" = 'vterm' ]
     function vterm_printf;

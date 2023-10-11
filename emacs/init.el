@@ -1,3 +1,4 @@
+(setq native-comp-speed 3)
 (defvar elpaca-installer-version 0.5)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -339,8 +340,11 @@
   :config
   (setq corfu-cycle t)
   (setq corfu-auto t)
-  (setq corfu-auto-delay 0)
-  (global-corfu-mode))
+  (setq corfu-auto-delay 0.3)
+  (setq corfu-preview-current nil)
+  (setq corfu-preselect nil)
+  (global-corfu-mode)
+  (corfu-echo-mode))
 
 (use-package cape
   :init
@@ -384,9 +388,6 @@
   (evil-make-overriding-map flymake-project-diagnostics-mode-map 'normal)
   (general-def 'normal flymake-project-diagnostics-mode-map "q" 'kill-buffer-and-window)
   (general-def 'normal flymake-project-diagnostics-mode-map "ZZ" 'kill-buffer-and-window)
-  (defun me/consult-flymake-project-diagnostics ()
-    (interactive)
-    (consult-flymake t))
   (defun me/flymake-clear-diagnostics ()
     "Removes diagnostics list"
     (interactive)
