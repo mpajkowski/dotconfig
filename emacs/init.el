@@ -370,7 +370,8 @@
                 '(:rust-analyzer (:checkOnSave (:enable t
                                                 :command "clippy"
                                                 :extraArgs ["--target-dir" "/tmp/rust-analyzer-check" "--" "-D" "warnings"])
-                                  :cargo (:features "all")))))
+                                  :cargo (:features "all")
+                                  :check (:allTargets :json-false)))))
 (use-package eldoc
   :elpaca nil
   :ensure nil

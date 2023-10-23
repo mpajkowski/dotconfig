@@ -1,15 +1,30 @@
 local wezterm = require('wezterm')
 
+function isdarwin()
+    return string.find(wezterm.target_triple, 'darwin')
+end
+
 local config = {}
 
 config.font = wezterm.font('Monaco')
-config.font_size = 15
+
+if isdarwin() then
+    config.font_size = 15
+else
+    config.font_size = 12
+end
+
+config.window_padding = {
+    left = 2,
+    right = 2,
+    top = 0,
+    bottom = 0,
+}
 
 config.color_scheme = 'Tomorrow Night'
-config.tab_bar_at_bottom = true
 
 function normalize_mods(mods)
-    if string.find(wezterm.target_triple, 'darwin') then
+    if isdarwin() then
         return string.gsub(mods, 'ALT', 'CMD')
     else
         return mods

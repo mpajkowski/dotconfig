@@ -17,7 +17,6 @@ font pango:Monego 18px
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex --autostart --environment i3
 
-exec --no-startup-id xset r rate 300 50
 exec --no-startup-id xrdb -merge ~/.Xresources
 
 default_border pixel 1
@@ -30,6 +29,7 @@ set $down j
 set $left h
 set $right l
 
+
 # use Mouse+Mod1 to drag floating windows to their wanted position
 floating_modifier Mod1
 
@@ -37,8 +37,16 @@ floating_modifier Mod1
 # or left-clicking anywhere into the window while holding the floating modifier.
 tiling_drag modifier titlebar
 
+set $exec_term exec alacritty --working-directory $(xcwd)
+
 # start a terminal
-bindsym Mod1+Shift+Return exec ~/.local/bin/kitty
+bindsym Mod1+Shift+Return $exec_term
+
+# start a terminal below
+bindsym Mod1+Shift+d split v $exec_term
+
+# start a terminal
+bindsym Mod1+Shift+r split h $exec_term
 
 # kill focused window
 bindsym Mod1+Shift+q kill
@@ -169,3 +177,4 @@ bar {
 }
 
 exec --no-startup-id picom --fade-in-step=1 --fade-out-step=1 --fade-delta=0
+exec --no-startup-id xset r rate 300 50
