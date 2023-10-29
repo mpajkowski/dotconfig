@@ -50,3 +50,5 @@ if [ "$INSIDE_EMACS" = 'vterm' ]
 else
     fish_vi_key_bindings
 end
+
+zoxide init fish | source
