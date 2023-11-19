@@ -1,6 +1,6 @@
+require("me.paq")
 require("me.set")
 require("me.remap")
-require("me.packer")
 
 local me_group = vim.api.nvim_create_augroup("MeGroup", {})
 
