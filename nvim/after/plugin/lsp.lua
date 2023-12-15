@@ -2,7 +2,7 @@ local cmp = require("cmp")
 cmp.setup({
     snippet = {
         expand = function(args)
-            require("luasnip").lsp_expand(args.body)
+            vim.fn["vsnip#anonymous"](args.body)
         end
     },
     mapping = {
@@ -19,7 +19,7 @@ cmp.setup({
     },
     sources = cmp.config.sources({
         { name = "nvim_lsp" },
-        { name = "vsnip" },
+        { name = "vsnips" },
         { name = "path" },
         { name = "buffer" },
     }),

@@ -7,11 +7,11 @@ local me_group = vim.api.nvim_create_augroup("MeGroup", {})
 --autocmd BufRead,BufNewFile * setlocal signcolumn=yes
 --autocmd FileType tagbar,nerdtree setlocal signcolumn=no
 
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-    group = me_group,
-    pattern = "*",
-    command = [[%s/\s\+$//e]]
-})
+--vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+--    group = me_group,
+--    pattern = "*",
+--    command = [[%s/\s\+$//e]]
+--})
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     group = me_group,
