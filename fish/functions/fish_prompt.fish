@@ -14,7 +14,7 @@ function fish_prompt
         set arrow_color "$red"
     end
 
-    set KUBE_CONTEXT (cat ~/.kube/config | grep "current-context:" | sed "s/current-context: //" | tr -d '"')
+    set KUBE_CONTEXT (cat ~/.kube/config 2>/dev/null | grep "current-context:" | sed "s/current-context: //" | tr -d '"')
 
     if [ -n $KUBE_CONTEXT ]
       set_color magenta

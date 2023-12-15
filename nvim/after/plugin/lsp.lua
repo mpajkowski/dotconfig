@@ -73,6 +73,16 @@ lspconfig.taplo.setup({
     on_attach = on_attach
 })
 
+lspconfig.clangd.setup({
+    capabilities = capabilities,
+    on_attach = on_attach
+})
+
+lspconfig.gopls.setup({
+    capabilities = capabilities,
+    on_attach = on_attach
+})
+
 vim.diagnostic.config({
     virtual_text = false
 })
