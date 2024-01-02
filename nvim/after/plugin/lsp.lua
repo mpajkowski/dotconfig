@@ -83,6 +83,13 @@ lspconfig.gopls.setup({
     on_attach = on_attach
 })
 
+lspconfig.tsserver.setup {
+  capabilities = capabilities,
+  on_attach = on_attach,
+  filetypes = { "typescript", "typescriptreact", "typescript.tsx" },
+  cmd = { "typescript-language-server", "--stdio" }
+} 
+
 vim.diagnostic.config({
     virtual_text = false
 })
