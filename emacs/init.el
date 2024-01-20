@@ -361,7 +361,7 @@
                           (eglot-inlay-hints-mode -1)
                           (setq-local completion-at-point-functions
                                       (list
-                                       (cape-super-capf
+                                       (cape-capf-super
                                         #'eglot-completion-at-point
                                         #'cape-keyword)))))
   (before-save . eglot-format-buffer)
