@@ -16,3 +16,4 @@ set_wincmd("k")
 set_wincmd("l")
 
 vim.keymap.set("n", "<M-x>", ":")
+vim.keymap.set("n", "<leader>jq", ":%!jq<CR>")

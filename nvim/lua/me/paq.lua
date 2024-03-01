@@ -25,7 +25,7 @@ bootstrap_paq {
     'BurntSushi/ripgrep',
     'nvim-lua/plenary.nvim',
     { 'nvim-telescope/telescope.nvim', tag = '0.1.5' },
-    'nvim-telescope/telescope-file-browser.nvim',
+    'nvim-tree/nvim-tree.lua',
     { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' },
     'tpope/vim-fugitive',
     'kristijanhusak/vim-hybrid-material',

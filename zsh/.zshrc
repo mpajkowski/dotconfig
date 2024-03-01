@@ -17,11 +17,6 @@ setopt no_nomatch
 autoload -Uz vcs_info
 precmd() { vcs_info }
 
-kube_context() {
-    kubectl config get-contexts | grep '*' | awk '{ print $2 }'
-}
-
-RPROMPT='$(kube_context)'
 PROMPT='%F{white}%~%F{red}${vcs_info_msg_0_}%F{yellow} >%F{white} '
 
 export EDITOR=vim
