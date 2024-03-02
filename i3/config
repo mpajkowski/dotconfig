@@ -48,6 +48,8 @@ bindsym Mod1+Shift+d split v $exec_term
 # start a terminal
 bindsym Mod1+Shift+r split h $exec_term
 
+bindsym Print exec flameshot gui
+
 # kill focused window
 bindsym Mod1+Shift+q kill
 
