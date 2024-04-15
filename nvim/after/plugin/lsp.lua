@@ -43,18 +43,35 @@ local function on_attach(client, bufnr)
     vim.keymap.set("n", "<leader>mv", vim.lsp.buf.rename, opts)
     vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
 
-    vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format({ async = false})]]
+    vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format({ async = false })]]
 end
 
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
+local is_in_styx_bare_crates = function()
+    return string.match(vim.fn.expand('%:p'), 'styx/bare_crates')
+end
+
 lspconfig.rust_analyzer.setup({
     capabilities = capabilities,
     on_attach = on_attach,
+    on_init = function(client)
+        local path = client.workspace_folders[1].name
+
+        if string.match(path, 'styx/kernel') then
+            print('executing styx quirks')
+            client.config.settings["rust-analyzer"].check.allTargets = false
+            client.config.settings["rust-analyzer"].cargo.target = 'x86_64-unknown-none'
+
+            client.notify('workspace/didChangeConfiguration', { settings = client.config.settings })
+        end
+
+        return true
+    end,
     settings = {
         ["rust-analyzer"] = {
             check = {
-                allTargets = true
+                allTargets = true,
             },
             checkOnSave = {
                 enable = true,
@@ -93,6 +110,12 @@ lspconfig.tsserver.setup {
 lspconfig.zls.setup({
     capabilities = capabilities,
     on_attach = on_attach
+})
+
+lspconfig.asm_lsp.setup({
+    capabilities = capabilities,
+    on_attach = on_attach,
+    filetypes = { "asm", "s", "S", "inc" },
 })
 
 vim.diagnostic.config({

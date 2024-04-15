@@ -45,4 +45,5 @@ bootstrap_paq {
     'hrsh7th/nvim-cmp',
     'hrsh7th/cmp-vsnip',
     'hrsh7th/vim-vsnip',
+    "FabijanZulj/blame.nvim"
 }
